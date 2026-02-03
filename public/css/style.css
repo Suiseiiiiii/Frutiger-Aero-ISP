@@ -1,4 +1,4 @@
-/* ==================== FRUTIGER AERO DESIGN - WINDOWS VISTA/7 STYLE ==================== */
+/* ==================== FRUTIGER AERO DESIGN - WINDOWS VISTA/7 STYLE WITH ANIMATIONS ==================== */
 
 * {
   margin: 0;
@@ -20,12 +20,89 @@
   --aero-yellow: #f59e0b;
 }
 
+/* ==================== ANIMATIONS ==================== */
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes glassShine {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0, 0, 0, 0.2); }
+  50% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), 0 3px 8px rgba(0, 0, 0, 0.15); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74, 158, 255, 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(74, 158, 255, 0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes floatUp {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes ripple {
+  0% { 
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% { 
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes titleBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes backgroundShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 html, body {
-  font-family: 'Frutiger', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #003da5 0%, #4a9eff 50%, #84c5ff 100%);
+  font-family: 'Segoe UI', 'Tahoma', 'Microsoft Sans Serif', 'Frutiger', Verdana, sans-serif;
+  background: linear-gradient(-45deg, #003da5, #4a9eff, #84c5ff, #0078d7);
+  background-size: 400% 400%;
+  animation: backgroundShift 15s ease infinite;
   min-height: 100vh;
   color: #333;
   overflow-x: hidden;
+}
+
+body {
+  line-height: 1.6;
 }
 
 /* ==================== HEADER & NAVIGATION ==================== */
@@ -38,6 +115,7 @@ header {
   position: sticky;
   top: 0;
   z-index: 1000;
+  animation: slideInDown 0.6s ease;
 }
 
 .header-container {
@@ -60,11 +138,19 @@ header {
   display: flex;
   align-items: center;
   gap: 8px;
+  animation: titleBounce 2s ease-in-out infinite;
+  letter-spacing: 0.5px;
+}
+
+.logo:hover {
+  animation: none;
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
 }
 
 .logo-icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   background: linear-gradient(135deg, #003da5, #4a9eff);
   border-radius: 4px;
   display: flex;
@@ -72,6 +158,14 @@ header {
   justify-content: center;
   color: white;
   font-weight: bold;
+  font-size: 18px;
+  box-shadow: 0 3px 8px rgba(0, 61, 165, 0.3);
+  transition: all 0.3s ease;
+}
+
+.logo-icon:hover {
+  box-shadow: 0 5px 15px rgba(0, 61, 165, 0.5);
+  transform: translateY(-2px);
 }
 
 nav ul {
@@ -87,16 +181,33 @@ nav a, .nav-button {
   font-weight: 500;
   padding: 8px 12px;
   border-radius: 3px;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   cursor: pointer;
   border: none;
   background: none;
   font-size: 14px;
+  position: relative;
+}
+
+nav a::after, .nav-button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #0078d7;
+  transition: width 0.3s ease;
+}
+
+nav a:hover::after, .nav-button:hover::after {
+  width: 100%;
 }
 
 nav a:hover, .nav-button:hover {
-  background: rgba(74, 158, 255, 0.2);
+  background: rgba(74, 158, 255, 0.15);
   color: #003da5;
+  transform: translateY(-2px);
 }
 
 .nav-button-primary {
@@ -105,11 +216,13 @@ nav a:hover, .nav-button:hover {
   padding: 8px 16px;
   border: 1px solid #0078d7;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  animation: glassShine 3s ease-in-out infinite;
 }
 
 .nav-button-primary:hover {
   background: linear-gradient(180deg, #5aa8ff, #0078d7);
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
 }
 
 /* ==================== BUTTONS ==================== */
@@ -120,24 +233,44 @@ nav a:hover, .nav-button:hover {
   border-radius: 3px;
   background: linear-gradient(180deg, #f0f0f0, #e8e8e8);
   color: #000;
-  font-family: 'Frutiger', Segoe UI, sans-serif;
+  font-family: 'Segoe UI', 'Tahoma', 'Microsoft Sans Serif', sans-serif;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   font-size: 14px;
   display: inline-block;
   text-decoration: none;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: left 0.5s ease;
+}
+
+.btn:hover::before {
+  left: 100%;
 }
 
 .btn:hover:not(:disabled) {
   background: linear-gradient(180deg, #ffffff, #f0f0f0);
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
 }
 
 .btn:active:not(:disabled) {
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: translateY(0);
 }
 
 .btn-primary {
@@ -145,11 +278,13 @@ nav a:hover, .nav-button:hover {
   color: white;
   border: 1px solid #0078d7;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  font-weight: 600;
 }
 
 .btn-primary:hover:not(:disabled) {
   background: linear-gradient(180deg, #5aa8ff, #1084e8);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 3px 8px rgba(0, 120, 215, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(-3px);
 }
 
 .btn-success {
@@ -160,6 +295,7 @@ nav a:hover, .nav-button:hover {
 
 .btn-success:hover:not(:disabled) {
   background: linear-gradient(180deg, #5dd791, #22c55e);
+  transform: translateY(-2px);
 }
 
 .btn-danger {
@@ -170,6 +306,7 @@ nav a:hover, .nav-button:hover {
 
 .btn-danger:hover:not(:disabled) {
   background: linear-gradient(180deg, #fb9191, #ef4444);
+  transform: translateY(-2px);
 }
 
 .btn-warning {
@@ -181,6 +318,7 @@ nav a:hover, .nav-button:hover {
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none !important;
 }
 
 /* ==================== INPUT FIELDS ==================== */
@@ -196,8 +334,20 @@ select {
   border: 1px solid #a0a0a0;
   border-radius: 3px;
   background: white;
-  font-family: 'Frutiger', Segoe UI, sans-serif;
+  font-family: 'Segoe UI', 'Tahoma', 'Microsoft Sans Serif', sans-serif;
   font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #0078d7;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(0, 120, 215, 0.2);
+  background: #fafafa;
+}
   transition: all 0.2s ease;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
@@ -238,6 +388,13 @@ label {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   padding: 20px;
   margin-bottom: 20px;
+  animation: slideInUp 0.6s ease, glassShine 4s ease-in-out infinite;
+  transition: all 0.3s ease;
+}
+
+.panel:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-3px);
 }
 
 .panel-title {
@@ -247,6 +404,7 @@ label {
   margin-bottom: 15px;
   padding-bottom: 10px;
   border-bottom: 2px solid rgba(74, 158, 255, 0.3);
+  animation: slideInDown 0.5s ease 0.1s backwards;
 }
 
 .glass-effect {
@@ -255,6 +413,7 @@ label {
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
   border-radius: 3px;
+  animation: fadeIn 0.6s ease;
 }
 
 /* ==================== MAIN LAYOUT ==================== */
@@ -263,6 +422,7 @@ main {
   max-width: 1200px;
   margin: 30px auto;
   padding: 0 20px;
+  animation: fadeIn 0.8s ease;
 }
 
 .container {
@@ -272,24 +432,34 @@ main {
   padding: 0 20px;
 }
 
+.page {
+  animation: fadeIn 0.5s ease;
+}
+
 .hero {
   text-align: center;
   color: white;
-  padding: 60px 20px;
+  padding: 80px 20px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, rgba(0, 61, 165, 0.1), rgba(74, 158, 255, 0.1));
+  border-radius: 8px;
+  animation: slideInDown 0.8s ease;
 }
 
 .hero h1 {
-  font-size: 48px;
+  font-size: 56px;
   font-weight: bold;
   margin-bottom: 15px;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4);
+  animation: slideInDown 0.6s ease 0.2s backwards;
+  letter-spacing: 1px;
 }
 
 .hero p {
-  font-size: 20px;
+  font-size: 22px;
   margin-bottom: 30px;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  animation: slideInUp 0.6s ease 0.3s backwards;
 }
 
 .hero-buttons {
@@ -297,6 +467,11 @@ main {
   gap: 15px;
   justify-content: center;
   flex-wrap: wrap;
+  animation: slideInUp 0.6s ease 0.4s backwards;
+}
+
+.hero-buttons .btn {
+  animation: pulseGlow 2s ease-in-out infinite;
 }
 
 /* ==================== GRID LAYOUTS ==================== */
@@ -304,6 +479,7 @@ main {
 .grid {
   display: grid;
   gap: 20px;
+  animation: fadeIn 0.8s ease;
 }
 
 .grid-2 {
@@ -318,6 +494,30 @@ main {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
+.grid > * {
+  animation: slideInUp 0.6s ease;
+}
+
+.grid > :nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.grid > :nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.grid > :nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.grid > :nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+.grid > :nth-child(6) {
+  animation-delay: 0.5s;
+}
+
 /* ==================== CARDS ==================== */
 
 .card {
@@ -327,11 +527,29 @@ main {
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #003da5, #4a9eff, #84c5ff);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.card:hover::before {
+  transform: translateX(0);
 }
 
 .card:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 61, 165, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transform: translateY(-4px) scale(1.02);
 }
 
 .card-header {
@@ -339,13 +557,18 @@ main {
   font-weight: bold;
   color: #003da5;
   margin-bottom: 10px;
+  animation: slideInDown 0.5s ease;
 }
 
 .card-price {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: bold;
-  color: #4a9eff;
+  background: linear-gradient(135deg, #003da5, #4a9eff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 15px;
+  animation: slideInUp 0.5s ease 0.1s backwards;
 }
 
 .card-features {
@@ -356,6 +579,7 @@ main {
 .card-features li {
   padding: 8px 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  animation: slideInUp 0.4s ease;
 }
 
 .card-features li:before {
@@ -375,6 +599,7 @@ table {
   margin: 20px 0;
   border-radius: 3px;
   overflow: hidden;
+  animation: slideInUp 0.6s ease;
 }
 
 thead {
@@ -413,6 +638,13 @@ tbody tr:nth-child(even) {
   align-items: center;
   gap: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  animation: slideInDown 0.5s ease;
+  transition: all 0.3s ease;
+}
+
+.alert:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 .alert-info {
@@ -441,17 +673,26 @@ tbody tr:nth-child(even) {
 
 .alert-icon {
   font-size: 20px;
+  animation: floatUp 2s ease-in-out infinite;
 }
 
 /* ==================== STATUS BADGES ==================== */
 
 .badge {
   display: inline-block;
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: bold;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.badge:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
 }
 
 .badge-success {
@@ -622,7 +863,8 @@ footer {
   border-top: 2px solid #a0a0a0;
   padding: 40px 20px;
   margin-top: 60px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 -4px 8px rgba(0, 0, 0, 0.1);
+  animation: slideInUp 0.8s ease 0.5s backwards;
 }
 
 .footer-content {
@@ -633,10 +875,21 @@ footer {
   gap: 30px;
 }
 
+.footer-section {
+  animation: slideInUp 0.6s ease;
+  transition: all 0.3s ease;
+}
+
+.footer-section:hover {
+  transform: translateY(-5px);
+}
+
 .footer-section h3 {
   color: #003da5;
   margin-bottom: 15px;
   font-size: 16px;
+  animation: slideInDown 0.5s ease;
+  letter-spacing: 0.5px;
 }
 
 .footer-section ul {
@@ -645,16 +898,34 @@ footer {
 
 .footer-section li {
   margin-bottom: 8px;
+  animation: slideInUp 0.4s ease;
 }
 
 .footer-section a {
   color: #666;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.footer-section a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #003da5;
+  transition: width 0.3s ease;
+}
+
+.footer-section a:hover::after {
+  width: 100%;
 }
 
 .footer-section a:hover {
   color: #003da5;
+  transform: translateX(3px);
 }
 
 .footer-bottom {
@@ -664,6 +935,7 @@ footer {
   text-align: center;
   color: #666;
   font-size: 14px;
+  animation: fadeIn 0.8s ease;
 }
 
 /* ==================== RESPONSIVE DESIGN ==================== */
