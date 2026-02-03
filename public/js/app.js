@@ -245,9 +245,13 @@ function initLoginPage() {
   // Form submission handler
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    console.log('Form submitted. isAdminMode:', isAdminMode);
+    
     if (isAdminMode) {
       const username = document.getElementById('login-username').value;
       const password = document.getElementById('login-password').value;
+      console.log('Admin login attempt. Username:', username, 'Password length:', password.length);
+      
       if (!username || !password) {
         showAlert('Username and password required', 'danger');
         return;
@@ -256,6 +260,8 @@ function initLoginPage() {
     } else {
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
+      console.log('User login attempt. Email:', email, 'Password length:', password.length);
+      
       if (!email || !password) {
         showAlert('Email and password required', 'danger');
         return;
@@ -270,16 +276,24 @@ function initLoginPage() {
   const adminCheckbox = document.getElementById('login-as-admin');
   const emailField = document.getElementById('login-email-field');
   const usernameField = document.getElementById('login-username-field');
+  const emailInput = document.getElementById('login-email');
+  const usernameInput = document.getElementById('login-username');
 
   if (adminCheckbox) {
     adminCheckbox.addEventListener('change', (e) => {
       isAdminMode = e.target.checked;
+      console.log('Admin checkbox changed. isAdminMode:', isAdminMode);
+      
       if (isAdminMode) {
         if (emailField) emailField.style.display = 'none';
         if (usernameField) usernameField.style.display = 'block';
+        if (emailInput) emailInput.removeAttribute('required');
+        if (usernameInput) usernameInput.setAttribute('required', 'required');
       } else {
         if (emailField) emailField.style.display = 'block';
         if (usernameField) usernameField.style.display = 'none';
+        if (emailInput) emailInput.setAttribute('required', 'required');
+        if (usernameInput) usernameInput.removeAttribute('required');
       }
     });
   }
