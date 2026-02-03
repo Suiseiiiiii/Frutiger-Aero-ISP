@@ -55,17 +55,17 @@ function makeRequest(method, path, data = null, token = null) {
 async function test(name, fn) {
   try {
     await fn();
-    console.log(`✓ ${name}`);
+    console.log(`[PASS] ${name}`);
     testsPassed++;
   } catch (error) {
-    console.error(`✗ ${name}`);
+    console.error(`[FAIL] ${name}`);
     console.error(`  Error: ${error.message}`);
     testsFailed++;
   }
 }
 
 async function runTests() {
-  console.log('🧪 Starting ISP Website Test Suite...\n');
+  console.log(' Starting ISP Website Test Suite...\n');
 
   let userToken = null;
   let adminToken = null;
@@ -73,7 +73,7 @@ async function runTests() {
   let ticketId = null;
 
   // ==================== PUBLIC API TESTS ====================
-  console.log('📋 Public API Tests:');
+  console.log(' Public API Tests:');
 
   await test('Health check endpoint', async () => {
     const result = await makeRequest('GET', '/health');
@@ -89,7 +89,7 @@ async function runTests() {
   });
 
   // ==================== USER AUTHENTICATION TESTS ====================
-  console.log('\n🔐 User Authentication Tests:');
+  console.log('\n User Authentication Tests:');
 
   const testUsername = `testuser${Date.now()}`;
   const testEmail = `test${Date.now()}@example.com`;
@@ -149,7 +149,7 @@ async function runTests() {
   });
 
   // ==================== USER PROFILE TESTS ====================
-  console.log('\n👤 User Profile Tests:');
+  console.log('\n User Profile Tests:');
 
   await test('Get user profile with valid token', async () => {
     const result = await makeRequest('GET', '/user/profile', null, userToken);
@@ -165,7 +165,7 @@ async function runTests() {
   });
 
   // ==================== SUPPORT TICKET TESTS ====================
-  console.log('\n🎫 Support Ticket Tests:');
+  console.log('\n Support Ticket Tests:');
 
   await test('Create support ticket', async () => {
     const result = await makeRequest('POST', '/support/ticket', {
@@ -185,7 +185,7 @@ async function runTests() {
   });
 
   // ==================== ADMIN AUTHENTICATION TESTS ====================
-  console.log('\n🔑 Admin Authentication Tests:');
+  console.log('\n Admin Authentication Tests:');
 
   await test('Admin login with correct credentials', async () => {
     const result = await makeRequest('POST', '/auth/admin-login', {
@@ -206,7 +206,7 @@ async function runTests() {
   });
 
   // ==================== ADMIN ENDPOINTS TESTS ====================
-  console.log('\n⚙️  Admin Panel Tests:');
+  console.log('\n  Admin Panel Tests:');
 
   await test('Get all users (admin only)', async () => {
     const result = await makeRequest('GET', '/admin/users', null, adminToken);
@@ -255,7 +255,7 @@ async function runTests() {
   });
 
   // ==================== USER STATUS MANAGEMENT TESTS ====================
-  console.log('\n🚫 User Management Tests:');
+  console.log('\n User Management Tests:');
 
   await test('Suspend user (admin only)', async () => {
     const result = await makeRequest('POST', `/admin/user/${userId}/suspend`, null, adminToken);

@@ -1,8 +1,8 @@
-# 🚀 ISP Website - Quick Start Guide
+#  ISP Website - Quick Start Guide
 
 Welcome! Your complete, production-ready ISP website is now fully built and tested. Here's everything you need to know to get started.
 
-## ⚡ Quick Start (30 seconds)
+##  Quick Start (30 seconds)
 
 ```bash
 cd /home/darwinnorton/Desktop/websit
@@ -20,22 +20,22 @@ That's it! Your ISP website is running.
 
 ---
 
-## 📋 What's Included
+##  What's Included
 
-✅ **Complete Frontend**
+ **Complete Frontend**
 - Frutiger Aero (Windows Vista/7) design
 - Home, Plans, Support, Login, Signup pages
 - Responsive mobile-friendly layout
 - Smooth animations and transitions
 
-✅ **Secure Backend**
+ **Secure Backend**
 - Node.js/Express server
 - SQLite database with users, admins, tickets, logs
 - JWT authentication
 - Rate limiting on all endpoints
 - Helmet.js security headers
 
-✅ **Admin Panel**
+ **Admin Panel**
 - View all users
 - Suspend/reactivate accounts
 - Manage support tickets
@@ -43,28 +43,28 @@ That's it! Your ISP website is running.
 - View complete audit logs
 - System statistics
 
-✅ **Security Features**
+ **Security Features**
 - Password hashing with bcryptjs
 - Rate limiting (5 login attempts/15min, 50 signups/hour)
 - CORS protection
 - Input validation
 - UK Data Protection compliant
 
-✅ **Full Test Suite**
+ **Full Test Suite**
 - 25 comprehensive tests
 - All functionality verified
 - 100% pass rate
 
 ---
 
-## 🔑 Default Admin Credentials
+##  Default Admin Credentials
 
 ```
 Username: admin
 Password: admin123
 ```
 
-⚠️ **Change these immediately in production!**
+ **Change these immediately in production!**
 
 ---
 
@@ -92,7 +92,7 @@ websit/
 
 ---
 
-## 🎯 Available Pages
+##  Available Pages
 
 ### User Pages
 - **Home** (`/`) - Landing page with features and calls-to-action
@@ -122,9 +122,9 @@ npm test
 
 Expected output:
 ```
-✅ Tests Passed: 25
-❌ Tests Failed: 0
-📊 Total Tests: 25
+ Tests Passed: 25
+ Tests Failed: 0
+ Total Tests: 25
 ```
 
 Tests verify:
@@ -137,7 +137,7 @@ Tests verify:
 
 ---
 
-## 💻 Using the Website
+##  Using the Website
 
 ### As a Regular User
 
@@ -236,29 +236,29 @@ Full API documentation: [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
 
 ---
 
-## 🔒 Security Features
+##  Security Features
 
-✅ **Password Security**
+ **Password Security**
 - Minimum 8 characters required
 - Hashed with bcryptjs
 - Never stored in plain text
 
-✅ **Rate Limiting**
+ **Rate Limiting**
 - Login: 5 failed attempts per 15 minutes
 - Signup: 50 attempts per hour
 - General: 100 requests per 15 minutes
 
-✅ **Authentication**
+ **Authentication**
 - JWT tokens with expiration
 - User tokens: 7 days
 - Admin tokens: 1 day
 
-✅ **Data Protection**
+ **Data Protection**
 - UK compliant data handling
 - User consent tracking
 - Complete audit trail
 
-✅ **Backend Security**
+ **Backend Security**
 - Helmet.js headers
 - CORS protection
 - Input validation
@@ -266,7 +266,7 @@ Full API documentation: [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
 
 ---
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Server won't start
 
@@ -305,7 +305,7 @@ npm start
 
 ---
 
-## 📊 Database Schema
+##  Database Schema
 
 ### Users
 - username, email, password (hashed)
@@ -333,7 +333,7 @@ npm start
 
 ---
 
-## 🚀 Deployment to Production
+##  Deployment to Production
 
 Before deploying to production:
 
@@ -364,7 +364,7 @@ Before deploying to production:
 
 ---
 
-## 📚 Documentation
+##  Documentation
 
 - **Full Guide**: [README.md](README.md)
 - **API Reference**: [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
@@ -404,7 +404,7 @@ Before deploying to production:
 
 ---
 
-## 📞 Support & Help
+##  Support & Help
 
 ### Common Tasks
 
@@ -438,7 +438,7 @@ sqlite> SELECT * FROM admin_logs;
 
 ---
 
-## ✨ What's Next?
+##  What's Next?
 
 1. **Customize Branding**
    - Update logo and colors
@@ -464,14 +464,14 @@ sqlite> SELECT * FROM admin_logs;
 
 ---
 
-## 🎉 You're All Set!
+##  You're All Set!
 
 Your ISP website is:
-- ✅ Fully built with modern design
-- ✅ Secure with authentication
-- ✅ Tested (25/25 tests passing)
-- ✅ Production-ready
-- ✅ Easy to deploy
+-  Fully built with modern design
+-  Secure with authentication
+-  Tested (25/25 tests passing)
+-  Production-ready
+-  Easy to deploy
 
 **Start the server and enjoy!**
 
@@ -486,6 +486,6 @@ Open `http://localhost:3000` in your browser.
 **Created**: 3 February 2026
 **Version**: 1.0.0
 **Status**: Production Ready
-**Tests**: 25/25 Passing ✅
+**Tests**: 25/25 Passing 
 
-Happy coding! 🚀
+Happy coding! 

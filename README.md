@@ -2,11 +2,11 @@
 
 A professional, fully-featured ISP website built with HTML, CSS, JavaScript, Node.js, Express, and SQLite. Features Windows Vista/7 Frutiger Aero design, secure authentication, admin panel, and comprehensive rate limiting security measures.
 
-## 🎯 Features
+## Features
 
 ### Frontend
-- **Frutiger Aero Design**: Beautiful Windows Vista/7-inspired UI with glass morphism effects
-- **Responsive Layout**: Works perfectly on desktop, tablet, and mobile devices
+- **Frutiger Aero Design**: Windows Vista/7-inspired user interface with glass morphism effects
+- **Responsive Layout**: Functions consistently on desktop, tablet, and mobile devices
 - **Multiple Pages**: Home, Login, Signup, Plans, Support, Account, Admin Panel
 - **Real-time Authentication**: JWT-based token system
 - **Interactive Admin Dashboard**: Manage users, view logs, handle support tickets
@@ -28,7 +28,7 @@ A professional, fully-featured ISP website built with HTML, CSS, JavaScript, Nod
   - View comprehensive admin activity logs
   - Track system statistics
 
-### Security & Compliance
+### Security and Compliance
 - UK Data Protection Law Compliance
 - Data consent tracking
 - Comprehensive audit logs
@@ -36,7 +36,7 @@ A professional, fully-featured ISP website built with HTML, CSS, JavaScript, Nod
 - Secure password requirements (minimum 8 characters)
 - Token-based authentication with expiration
 
-## 📋 Project Structure
+## Project Structure
 
 ```
 websit/
@@ -57,14 +57,14 @@ websit/
 └── README.md                   # This file
 ```
 
-## 🚀 Quick Start Guide
+## Quick Start Guide
 
 ### Prerequisites
 - Node.js (v14 or higher)
 - npm (comes with Node.js)
 - A modern web browser
 
-### Installation & Running
+### Installation and Running
 
 1. **Navigate to project directory**:
    ```bash
@@ -87,7 +87,7 @@ websit/
    - Navigate to `http://localhost:3000` in your web browser
    - You should see the Premium ISP homepage
 
-## 🧪 Testing
+## Testing
 
 Run the comprehensive test suite to verify all functionality:
 
@@ -106,20 +106,20 @@ The test suite will validate:
 - Security measures and permissions
 - Input validation
 
-## 🔐 Default Admin Credentials
+## Default Admin Credentials
 
 **Username**: `admin`
 **Password**: `admin123`
 
-⚠️ **IMPORTANT**: Change these credentials in production!
+**WARNING**: Change these credentials in production!
 
-## 📖 User Guide
+## User Guide
 
 ### For Regular Users
 
 1. **Create Account**:
    - Click "Sign Up" button
-   - Enter username, email, password (min 8 chars)
+   - Enter username, email, password (minimum 8 characters)
    - Select a plan (Basic, Professional, or Enterprise)
    - Agree to data processing terms
    - Click "Create Account"
@@ -176,7 +176,7 @@ The test suite will validate:
    - View server time and status
    - Track system availability
 
-## 🔑 API Endpoints
+## API Endpoints
 
 ### Public Endpoints
 
@@ -221,12 +221,12 @@ GET  /api/admin/uptime                   - Get server uptime
 GET  /api/admin/statistics               - Get system statistics
 ```
 
-## 🔒 Security Features
+## Security Features
 
 ### Rate Limiting
 - **General**: 100 requests per 15 minutes per IP
 - **Login**: 5 failed attempts per 15 minutes per IP
-- **Signup**: 3 signups per hour per IP
+- **Signup**: 50 signups per hour per IP
 
 ### Authentication
 - **Password Hashing**: bcryptjs with salt rounds
@@ -237,7 +237,7 @@ GET  /api/admin/statistics               - Get system statistics
 ### Data Protection
 - User consent tracking for data processing
 - UK Data Protection Law compliance
-- Secure password requirements (8+ characters)
+- Secure password requirements (8 or more characters)
 - CORS protection
 - Helmet.js security headers
 
@@ -247,7 +247,7 @@ GET  /api/admin/statistics               - Get system statistics
 - User identification for all admin actions
 - Detailed action descriptions
 
-## 🎨 Design Features
+## Design Features
 
 ### Frutiger Aero Style
 - Windows Vista/7 inspired design
@@ -267,7 +267,7 @@ GET  /api/admin/statistics               - Get system statistics
 - Tab interfaces
 - Form validation
 
-## 📱 Browser Compatibility
+## Browser Compatibility
 
 - Chrome/Chromium (latest)
 - Firefox (latest)
@@ -275,7 +275,7 @@ GET  /api/admin/statistics               - Get system statistics
 - Edge (latest)
 - Mobile browsers
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Port 3000 Already in Use
 ```bash
@@ -298,7 +298,7 @@ npm start
 2. Check that port 3000 is not blocked
 3. Verify all npm dependencies are installed
 
-## 📊 Database Schema
+## Database Schema
 
 ### Users Table
 - id (Primary Key)
@@ -335,7 +335,7 @@ npm start
 - details
 - timestamp
 
-## 🚀 Production Deployment
+## Production Deployment
 
 ### Before Deploying to Production:
 
@@ -365,40 +365,40 @@ npm start
    - Set up logging and monitoring
    - Monitor database size and performance
 
-## 📞 Support & Contact
+## Support and Contact
 
 For support or issues:
 - Email: support@premierisp.com
 - Phone: 0800-XXX-XXXX
 - Hours: 24/7 Support Available
 
-## 📄 License
+## License
 
 This project is provided as-is for ISP website demonstration purposes.
 
-## ✨ Features Checklist
+## Features Checklist
 
-- ✅ Frutiger Aero (Windows Vista/7) Design
-- ✅ HTML, CSS, JavaScript Frontend
-- ✅ Node.js/Express Backend
-- ✅ SQLite Database
-- ✅ User Authentication (Signup/Login)
-- ✅ Admin Panel with Multiple Features
-- ✅ Support Ticket System
-- ✅ Rate Limiting Security
-- ✅ Admin Activity Logging
-- ✅ User Account Management
-- ✅ Server Uptime Monitoring
-- ✅ UK Data Protection Compliance
-- ✅ Localhost:3000 Ready
-- ✅ Comprehensive Test Suite
-- ✅ Fully Responsive Design
-- ✅ Error Handling & Validation
-- ✅ Multiple Pages (Home, Plans, Support, Account, Admin)
-- ✅ Real-time User Management
-- ✅ Support Ticket Management
-- ✅ System Statistics & Analytics
+- [X] Frutiger Aero (Windows Vista/7) Design
+- [X] HTML, CSS, JavaScript Frontend
+- [X] Node.js/Express Backend
+- [X] SQLite Database
+- [X] User Authentication (Signup/Login)
+- [X] Admin Panel with Multiple Features
+- [X] Support Ticket System
+- [X] Rate Limiting Security
+- [X] Admin Activity Logging
+- [X] User Account Management
+- [X] Server Uptime Monitoring
+- [X] UK Data Protection Compliance
+- [X] Localhost:3000 Ready
+- [X] Comprehensive Test Suite
+- [X] Fully Responsive Design
+- [X] Error Handling and Validation
+- [X] Multiple Pages (Home, Plans, Support, Account, Admin)
+- [X] Real-time User Management
+- [X] Support Ticket Management
+- [X] System Statistics and Analytics
 
-## 🎉 Ready to Go!
+## Deployment Ready
 
-Your ISP website is now ready to use. Start the server, open your browser to localhost:3000, and enjoy the complete, secure, professionally-designed ISP platform!
+Your ISP website is now ready to use. Start the server, open your browser to localhost:3000, and access the complete, secure, professionally-designed ISP platform.
