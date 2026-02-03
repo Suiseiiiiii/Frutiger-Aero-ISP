@@ -78,6 +78,7 @@ const initDatabase = () => {
         username TEXT UNIQUE NOT NULL,
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
+        phone TEXT,
         plan TEXT DEFAULT 'basic',
         status TEXT DEFAULT 'active',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -85,6 +86,13 @@ const initDatabase = () => {
         data_consent INTEGER DEFAULT 0
       )
     `);
+
+    // Add phone column if it doesn't exist (migration)
+    db.all(`PRAGMA table_info(users)`, (err, columns) => {
+      if (columns && !columns.find(c => c.name === 'phone')) {
+        db.run(`ALTER TABLE users ADD COLUMN phone TEXT`);
+      }
+    });
 
     // Admin accounts table
     db.run(`
@@ -283,7 +291,7 @@ app.post('/api/auth/admin-login', loginLimiter, (req, res) => {
 
 // Get user profile
 app.get('/api/user/profile', verifyToken, (req, res) => {
-  db.get(`SELECT id, username, email, plan, status, created_at, data_consent FROM users WHERE id = ?`, [req.user.id], (err, user) => {
+  db.get(`SELECT id, username, email, phone, plan, status, created_at, data_consent FROM users WHERE id = ?`, [req.user.id], (err, user) => {
     if (err || !user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -293,16 +301,61 @@ app.get('/api/user/profile', verifyToken, (req, res) => {
 
 // Update user profile
 app.put('/api/user/profile', verifyToken, (req, res) => {
-  const { plan } = req.body;
-
-  if (plan) {
-    db.run(`UPDATE users SET plan = ? WHERE id = ?`, [plan, req.user.id], (err) => {
-      if (err) return res.status(500).json({ error: 'Database error' });
-      res.json({ message: 'Profile updated' });
-    });
-  } else {
-    res.json({ message: 'No updates provided' });
+  const { username, email, phone, plan, status, data_consent } = req.body;
+  
+  // Validate input
+  if (!username && !email && !phone && !plan && status === undefined && data_consent === undefined) {
+    return res.status(400).json({ error: 'No updates provided' });
   }
+
+  // Build dynamic SQL update
+  const updates = [];
+  const values = [];
+
+  if (username) {
+    updates.push('username = ?');
+    values.push(username);
+  }
+  if (email) {
+    updates.push('email = ?');
+    values.push(email);
+  }
+  if (phone) {
+    updates.push('phone = ?');
+    values.push(phone);
+  }
+  if (plan) {
+    updates.push('plan = ?');
+    values.push(plan);
+  }
+  if (status !== undefined) {
+    updates.push('status = ?');
+    values.push(status);
+  }
+  if (data_consent !== undefined) {
+    updates.push('data_consent = ?');
+    values.push(data_consent ? 1 : 0);
+  }
+
+  updates.push('updated_at = CURRENT_TIMESTAMP');
+  values.push(req.user.id);
+
+  const sql = `UPDATE users SET ${updates.join(', ')} WHERE id = ?`;
+
+  db.run(sql, values, function(err) {
+    if (err) {
+      if (err.message.includes('UNIQUE')) {
+        return res.status(409).json({ error: 'Username or email already in use' });
+      }
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    // Return updated profile
+    db.get(`SELECT id, username, email, phone, plan, status, created_at, updated_at, data_consent FROM users WHERE id = ?`, [req.user.id], (err, user) => {
+      if (err) return res.status(500).json({ error: 'Database error' });
+      res.json(user);
+    });
+  });
 });
 
 // ==================== SUPPORT ENDPOINTS ====================
