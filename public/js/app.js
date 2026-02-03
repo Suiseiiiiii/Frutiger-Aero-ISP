@@ -539,6 +539,8 @@ function initAdminPanel() {
     return;
   }
 
+  console.log('Initializing admin panel...');
+
   // Initialize tabs
   const tabs = document.querySelectorAll('.tab-button');
   tabs.forEach(tab => {
@@ -548,30 +550,41 @@ function initAdminPanel() {
       tab.classList.add('active');
 
       const tabName = tab.getAttribute('data-tab');
+      console.log('Switching to tab:', tabName);
+      
       const contents = document.querySelectorAll('.tab-content');
       contents.forEach(c => c.classList.remove('active'));
       
       const activeContent = document.getElementById(`tab-${tabName}`);
-      if (activeContent) activeContent.classList.add('active');
+      if (activeContent) {
+        activeContent.classList.add('active');
+      } else {
+        console.warn('Tab content not found:', `tab-${tabName}`);
+      }
 
       if (tabName === 'overview') loadAdminOverview();
-      if (tabName === 'users') loadAdminUsers();
-      if (tabName === 'tickets') loadAdminTickets();
-      if (tabName === 'logs') loadAdminLogs();
-      if (tabName === 'uptime') loadAdminUptime();
+      else if (tabName === 'users') loadAdminUsers();
+      else if (tabName === 'tickets') loadAdminTickets();
+      else if (tabName === 'logs') loadAdminLogs();
+      else if (tabName === 'uptime') loadAdminUptime();
     });
   });
 
+  console.log('Loading initial admin overview...');
   loadAdminOverview();
 }
 
 async function loadAdminOverview() {
   try {
+    console.log('Loading admin overview...');
     const stats = await apiCall('/admin/statistics', 'GET');
     const uptime = await apiCall('/admin/uptime', 'GET');
 
     const container = document.getElementById('tab-overview');
-    if (!container) return;
+    if (!container) {
+      console.error('tab-overview container not found');
+      return;
+    }
 
     container.innerHTML = `
       <div class="grid grid-2">
@@ -597,16 +610,26 @@ async function loadAdminOverview() {
         </div>
       </div>
     `;
+    console.log('Admin overview loaded successfully');
   } catch (error) {
     console.error('Failed to load overview:', error);
+    showAlert('Failed to load overview: ' + error.message, 'danger');
+    const container = document.getElementById('tab-overview');
+    if (container) {
+      container.innerHTML = `<div class="alert alert-danger">Failed to load overview. Check console for details.</div>`;
+    }
   }
 }
 
 async function loadAdminUsers() {
   try {
+    console.log('Loading admin users...');
     const users = await apiCall('/admin/users', 'GET');
     const container = document.getElementById('tab-users');
-    if (!container) return;
+    if (!container) {
+      console.error('tab-users container not found');
+      return;
+    }
 
     container.innerHTML = `
       <table>
@@ -639,8 +662,14 @@ async function loadAdminUsers() {
         </tbody>
       </table>
     `;
+    console.log('Admin users loaded successfully');
   } catch (error) {
     console.error('Failed to load users:', error);
+    showAlert('Failed to load users: ' + error.message, 'danger');
+    const container = document.getElementById('tab-users');
+    if (container) {
+      container.innerHTML = `<div class="alert alert-danger">Failed to load users. Check console for details.</div>`;
+    }
   }
 }
 
@@ -894,7 +923,15 @@ function showDebugButtonIfAdmin() {
 // Expose navigation helper for inline handlers and debugging
 window.navigateTo = navigateTo;
 
+// Expose admin functions for inline onclick handlers
+window.viewUserDetails = viewUserDetails;
+window.toggleUserStatus = toggleUserStatus;
+window.updateTicketStatus = updateTicketStatus;
+window.closeModal = closeModal;
+window.openModal = openModal;
+
 // Debug: Log that app.js has loaded
 console.log('✅ app.js loaded successfully! navigateTo available.');
 console.log('Current user:', currentUser);
 console.log('Auth token:', authToken ? 'Present' : 'None');
+console.log('Admin functions exposed:', !!window.viewUserDetails);

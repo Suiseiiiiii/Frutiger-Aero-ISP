@@ -745,11 +745,11 @@ tbody tr:nth-child(even) {
 }
 
 .tab-content {
-  display: none;
+  display: none !important;
 }
 
 .tab-content.active {
-  display: block;
+  display: block !important;
 }
 
 /* ==================== MODALS ==================== */
