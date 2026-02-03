@@ -1,3 +1,5 @@
+i was to lazy to write this so i had deepseek make my MD because no one is meant to intall this, it is just a website twin
+
 # Premium ISP Website - Complete Documentation
 
 A professional, fully-featured ISP website built with HTML, CSS, JavaScript, Node.js, Express, and SQLite. Features Windows Vista/7 Frutiger Aero design, secure authentication, admin panel, and comprehensive rate limiting security measures.
@@ -68,7 +70,7 @@ websit/
 
 1. **Navigate to project directory**:
    ```bash
-   cd /home/darwinnorton/Desktop/websit
+   cd /home/username/Desktop/websit
    ```
 
 2. **Install dependencies**:
