@@ -4,6 +4,7 @@ const API_URL = 'http://localhost:3000/api';
 let authToken = localStorage.getItem('authToken');
 let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
 let isAdmin = localStorage.getItem('isAdmin') === 'true';
+let darkMode = localStorage.getItem('darkMode') === 'true';
 
 // ==================== UTILITY FUNCTIONS ====================
 
@@ -37,6 +38,23 @@ function showAlert(message, type = 'info') {
 function formatDate(dateString) {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-GB') + ' ' + date.toLocaleTimeString();
+}
+
+function toggleDarkMode() {
+  darkMode = !darkMode;
+  localStorage.setItem('darkMode', darkMode);
+  applyDarkMode();
+}
+
+function applyDarkMode() {
+  const html = document.documentElement;
+  if (darkMode) {
+    html.style.filter = 'invert(1) hue-rotate(180deg)';
+    html.classList.add('dark-mode');
+  } else {
+    html.style.filter = 'none';
+    html.classList.remove('dark-mode');
+  }
 }
 
 function getAuthHeader() {
@@ -328,41 +346,95 @@ async function initAccountPage() {
 
     container.innerHTML = `
       <div class="panel">
-        <div class="panel-title">Your Account Details</div>
-        <table>
-          <tr>
-            <td><strong>Username:</strong></td>
-            <td>${user.username}</td>
-          </tr>
-          <tr>
-            <td><strong>Email:</strong></td>
-            <td>${user.email}</td>
-          </tr>
-          <tr>
-            <td><strong>Plan:</strong></td>
-            <td><span class="badge badge-info">${user.plan}</span></td>
-          </tr>
-          <tr>
-            <td><strong>Status:</strong></td>
-            <td><span class="badge ${user.status === 'active' ? 'badge-success' : 'badge-danger'}">${user.status}</span></td>
-          </tr>
-          <tr>
-            <td><strong>Member Since:</strong></td>
-            <td>${formatDate(user.created_at)}</td>
-          </tr>
-          <tr>
-            <td><strong>Data Consent:</strong></td>
-            <td>${user.data_consent ? '✓ Agreed' : '✗ Not agreed'}</td>
-          </tr>
-        </table>
-        <button class="btn btn-primary mt-20" onclick="navigateTo('home')">Back to Home</button>
+        <div class="panel-title">Account Information</div>
+        <form id="account-form" style="display: grid; gap: 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+              <label for="account-username">Username</label>
+              <input type="text" id="account-username" value="${user.username}" required>
+            </div>
+            <div class="form-group">
+              <label for="account-email">Email Address</label>
+              <input type="email" id="account-email" value="${user.email}" required>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+              <label for="account-phone">Phone Number</label>
+              <input type="tel" id="account-phone" value="${user.phone || ''}" placeholder="Optional">
+            </div>
+            <div class="form-group">
+              <label for="account-plan">Plan</label>
+              <select id="account-plan" required>
+                <option value="basic" ${user.plan === 'basic' ? 'selected' : ''}>Basic - £19.99/month</option>
+                <option value="professional" ${user.plan === 'professional' ? 'selected' : ''}>Professional - £39.99/month</option>
+                <option value="enterprise" ${user.plan === 'enterprise' ? 'selected' : ''}>Enterprise - £79.99/month</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+              <label for="account-status">Account Status</label>
+              <select id="account-status" required>
+                <option value="active" ${user.status === 'active' ? 'selected' : ''}>Active</option>
+                <option value="suspended" ${user.status === 'suspended' ? 'selected' : ''}>Suspended</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="account-consent">
+                <input type="checkbox" id="account-consent" ${user.data_consent ? 'checked' : ''}>
+                I agree to data collection for service improvement
+              </label>
+            </div>
+          </div>
+
+          <div style="display: grid; gap: 10px;">
+            <div style="background: #f0f0f0; padding: 15px; border-radius: 3px; border-left: 4px solid #003da5;">
+              <strong>Member Since:</strong> ${formatDate(user.created_at)}
+            </div>
+            <div style="background: #f0f0f0; padding: 15px; border-radius: 3px; border-left: 4px solid #003da5;">
+              <strong>Account Status:</strong> <span class="badge ${user.status === 'active' ? 'badge-success' : 'badge-danger'}">${user.status}</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="button" class="btn" onclick="navigateTo('home'); return false;">Cancel</button>
+          </div>
+        </form>
       </div>
     `;
+
+    document.getElementById('account-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await updateUserProfile({
+        username: document.getElementById('account-username').value,
+        email: document.getElementById('account-email').value,
+        phone: document.getElementById('account-phone').value,
+        plan: document.getElementById('account-plan').value,
+        status: document.getElementById('account-status').value,
+        data_consent: document.getElementById('account-consent').checked ? 1 : 0
+      });
+    });
   } catch (error) {
     const container = document.getElementById('account-content');
     if (container) {
       container.innerHTML = '<div class="alert alert-danger">Failed to load account details</div>';
     }
+  }
+}
+
+async function updateUserProfile(data) {
+  try {
+    await apiCall('/user/profile', 'PUT', data);
+    showAlert('Profile updated successfully!', 'success');
+    currentUser = data;
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    await initAccountPage();
+  } catch (error) {
+    showAlert('Failed to update profile: ' + error.message, 'danger');
   }
 }
 
@@ -769,6 +841,8 @@ window.onclick = function(event) {
 
 document.addEventListener('DOMContentLoaded', function() {
   updateNavigation();
+  applyDarkMode();
+  showDebugButtonIfAdmin();
 
   if (currentUser && !isAdmin) {
     navigateTo('home');
@@ -787,6 +861,13 @@ document.addEventListener('DOMContentLoaded', function() {
     initAdminPanel();
   }
 });
+
+function showDebugButtonIfAdmin() {
+  const debugButton = document.getElementById('debug-button');
+  if (debugButton) {
+    debugButton.style.display = isAdmin ? 'block' : 'none';
+  }
+}
 
 // Expose navigation helper for inline handlers and debugging
 window.navigateTo = navigateTo;
