@@ -491,6 +491,83 @@ app.get('/api/admin/statistics', verifyAdmin, (req, res) => {
 
 // ==================== ERROR HANDLING ====================
 
+// ==================== SYSTEM CONTROL ====================
+
+// Get server status
+app.get('/api/admin/server-status', verifyAdmin, (req, res) => {
+  res.json({
+    status: 'online',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    memory: process.memoryUsage(),
+    pid: process.pid
+  });
+});
+
+// Live logs endpoint (server-sent events)
+app.get('/api/admin/live-logs', verifyAdmin, (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  const sendLog = (level, message) => {
+    const log = {
+      timestamp: new Date().toISOString(),
+      level,
+      message
+    };
+    res.write(`data: ${JSON.stringify(log)}\n\n`);
+  };
+
+  // Send initial connection message
+  sendLog('info', 'Live logging connection established');
+
+  // Keep connection alive
+  const interval = setInterval(() => {
+    res.write(`: keep-alive\n\n`);
+  }, 30000);
+
+  req.on('close', () => {
+    clearInterval(interval);
+    res.end();
+  });
+});
+
+// Get activity logs
+app.get('/api/admin/activity-logs', verifyAdmin, (req, res) => {
+  db.all(`
+    SELECT admin_logs.*, admins.username 
+    FROM admin_logs 
+    LEFT JOIN admins ON admin_logs.admin_id = admins.id 
+    ORDER BY admin_logs.timestamp DESC 
+    LIMIT 100
+  `, (err, logs) => {
+    if (err) return res.status(500).json({ error: 'Database error' });
+    res.json(logs || []);
+  });
+});
+
+// Get uptime history (simulated)
+app.get('/api/admin/uptime-history', verifyAdmin, (req, res) => {
+  const now = Date.now();
+  const history = [];
+  
+  // Generate 24 data points (one per hour)
+  for (let i = 23; i >= 0; i--) {
+    const timestamp = new Date(now - i * 3600000);
+    // Simulate uptime percentage (95-100%)
+    const uptime = 95 + Math.random() * 5;
+    history.push({
+      timestamp: timestamp.toISOString(),
+      uptime: Math.round(uptime * 100) / 100
+    });
+  }
+  
+  res.json(history);
+});
+
+// ==================== ERROR HANDLER ====================
+
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });
