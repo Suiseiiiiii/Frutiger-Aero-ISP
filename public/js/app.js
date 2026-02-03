@@ -240,12 +240,31 @@ function initLoginPage() {
   const form = document.getElementById('login-form');
   if (!form) return;
 
-  form.addEventListener('submit', async (e) => {
+  let isAdminMode = false;
+
+  // Form submission handler
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-    await handleLogin(email, password);
-  });
+    if (isAdminMode) {
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+      if (!username || !password) {
+        showAlert('Username and password required', 'danger');
+        return;
+      }
+      await handleAdminLogin(username, password);
+    } else {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      if (!email || !password) {
+        showAlert('Email and password required', 'danger');
+        return;
+      }
+      await handleLogin(email, password);
+    }
+  };
+
+  form.addEventListener('submit', handleFormSubmit);
 
   // Admin login toggle
   const adminCheckbox = document.getElementById('login-as-admin');
@@ -254,24 +273,13 @@ function initLoginPage() {
 
   if (adminCheckbox) {
     adminCheckbox.addEventListener('change', (e) => {
-      if (e.target.checked) {
+      isAdminMode = e.target.checked;
+      if (isAdminMode) {
         if (emailField) emailField.style.display = 'none';
         if (usernameField) usernameField.style.display = 'block';
-        document.getElementById('login-form').onsubmit = async (e) => {
-          e.preventDefault();
-          const username = document.getElementById('login-username').value;
-          const password = document.getElementById('login-password').value;
-          await handleAdminLogin(username, password);
-        };
       } else {
         if (emailField) emailField.style.display = 'block';
         if (usernameField) usernameField.style.display = 'none';
-        document.getElementById('login-form').onsubmit = async (e) => {
-          e.preventDefault();
-          const email = document.getElementById('login-email').value;
-          const password = document.getElementById('login-password').value;
-          await handleLogin(email, password);
-        };
       }
     });
   }
