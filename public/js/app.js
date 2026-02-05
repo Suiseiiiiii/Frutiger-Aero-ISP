@@ -579,12 +579,16 @@ async function loadAdminOverview() {
     console.log('Loading admin overview...');
     const stats = await apiCall('/admin/statistics', 'GET');
     const uptime = await apiCall('/admin/uptime', 'GET');
+    const activityLogs = await apiCall('/admin/activity-logs', 'GET');
 
     const container = document.getElementById('tab-overview');
     if (!container) {
       console.error('tab-overview container not found');
       return;
     }
+
+    // Get recent logs (last 10)
+    const recentLogs = activityLogs.slice(0, 10);
 
     container.innerHTML = `
       <div class="grid grid-2">
@@ -609,7 +613,45 @@ async function loadAdminOverview() {
           <p style="color: #666;">All systems operational</p>
         </div>
       </div>
+
+      <div style="margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
+        <h3 style="color: #003da5; margin-bottom: 15px;">Server Control</h3>
+        <div class="grid grid-2" style="gap: 20px;">
+          <button class="btn btn-primary" style="padding: 12px;" onclick="toggleServerStatus()">
+            ⏻ Server Status: ONLINE
+          </button>
+          <button class="btn" style="padding: 12px;" onclick="refreshAdminOverview()">
+            ↻ Refresh Overview
+          </button>
+        </div>
+      </div>
+
+      <div style="margin-top: 30px;">
+        <h3 style="color: #003da5; margin-bottom: 15px;">Recent Activity Log</h3>
+        <div id="live-log-container" style="background: #1a1a1a; color: #00ff00; font-family: 'Courier New', monospace; font-size: 12px; padding: 15px; border-radius: 3px; max-height: 300px; overflow-y: auto; margin-bottom: 10px;">
+          ${recentLogs.map(log => `
+            <div style="margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+              <span style="color: #888;">[${new Date(log.timestamp).toLocaleTimeString()}]</span>
+              <span style="color: #ffff00;">${log.username || 'system'}:</span>
+              <span>${log.action}</span>
+              ${log.details ? `<div style="color: #00ff99; margin-left: 20px; font-size: 11px;">${log.details}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn" onclick="clearLiveLog()" style="font-size: 12px;">Clear Log</button>
+      </div>
+
+      <div style="margin-top: 30px;">
+        <h3 style="color: #003da5; margin-bottom: 15px;">Server Uptime Chart</h3>
+        <div id="uptime-chart" style="height: 300px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 3px; display: flex; align-items: flex-end; padding: 10px; gap: 2px;">
+          <div style="text-align: center; color: #666; width: 100%;">Loading chart...</div>
+        </div>
+      </div>
     `;
+
+    // Load uptime chart
+    loadUptimeChart();
+    
     console.log('Admin overview loaded successfully');
   } catch (error) {
     console.error('Failed to load overview:', error);
@@ -618,6 +660,54 @@ async function loadAdminOverview() {
     if (container) {
       container.innerHTML = `<div class="alert alert-danger">Failed to load overview. Check console for details.</div>`;
     }
+  }
+}
+
+async function refreshAdminOverview() {
+  await loadAdminOverview();
+  showAlert('Overview refreshed', 'success');
+}
+
+async function loadUptimeChart() {
+  try {
+    const history = await apiCall('/admin/uptime-history', 'GET');
+    const chartContainer = document.getElementById('uptime-chart');
+    if (!chartContainer) return;
+
+    const maxUptime = 100;
+    const minUptime = 90;
+    const range = maxUptime - minUptime;
+
+    let html = '';
+    history.forEach(item => {
+      const percentage = item.uptime;
+      const height = ((percentage - minUptime) / range) * 250 + 20;
+      html += `
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+          <div style="width: 100%; height: ${height}px; background: #4a9eff; border-radius: 3px; transition: all 0.2s;" 
+               title="${percentage}% - ${new Date(item.timestamp).toLocaleTimeString()}"></div>
+          <div style="font-size: 10px; margin-top: 5px; color: #666;">${percentage}%</div>
+        </div>
+      `;
+    });
+
+    chartContainer.innerHTML = html;
+  } catch (error) {
+    console.error('Failed to load uptime chart:', error);
+  }
+}
+
+async function toggleServerStatus() {
+  const confirmed = confirm('This would toggle the server status. Are you sure? (Currently disabled for safety)');
+  if (confirmed) {
+    showAlert('Server control is disabled for safety in development.', 'info');
+  }
+}
+
+function clearLiveLog() {
+  const logContainer = document.getElementById('live-log-container');
+  if (logContainer) {
+    logContainer.innerHTML = '<div style="color: #888;">Log cleared</div>';
   }
 }
 
@@ -728,49 +818,92 @@ async function toggleUserStatus(userId, currentStatus) {
   }
 }
 
+// Store pagination state
+let ticketsPaginationState = { page: 1, pageSize: 12, allTickets: [] };
+
 async function loadAdminTickets() {
   try {
+    console.log('Loading admin tickets...');
     const tickets = await apiCall('/admin/support-tickets', 'GET');
-    const container = document.getElementById('tab-tickets');
-    if (!container) return;
-
-    container.innerHTML = `
-      <table>
-        <thead>
-          <tr>
-            <th>Ticket ID</th>
-            <th>Username</th>
-            <th>Subject</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${tickets.map(ticket => `
-            <tr>
-              <td>#${ticket.id}</td>
-              <td>${ticket.username || 'Unknown'}</td>
-              <td>${ticket.subject}</td>
-              <td>
-                <select style="padding: 4px; border-radius: 3px;" onchange="updateTicketStatus(${ticket.id}, this.value)">
-                  <option value="open" ${ticket.status === 'open' ? 'selected' : ''}>Open</option>
-                  <option value="in_progress" ${ticket.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
-                  <option value="resolved" ${ticket.status === 'resolved' ? 'selected' : ''}>Resolved</option>
-                  <option value="closed" ${ticket.status === 'closed' ? 'selected' : ''}>Closed</option>
-                </select>
-              </td>
-              <td>${formatDate(ticket.created_at)}</td>
-              <td>
-                <button class="btn" style="font-size: 12px;" onclick="viewTicketDetails(${ticket.id}, '${ticket.subject}', '${ticket.message}')">View</button>
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
+    ticketsPaginationState.allTickets = tickets;
+    ticketsPaginationState.page = 1;
+    displayTicketsPage();
   } catch (error) {
     console.error('Failed to load tickets:', error);
+    showAlert('Failed to load tickets: ' + error.message, 'danger');
+  }
+}
+
+function displayTicketsPage() {
+  const container = document.getElementById('tab-tickets');
+  if (!container) return;
+
+  const { page, pageSize, allTickets } = ticketsPaginationState;
+  const startIdx = (page - 1) * pageSize;
+  const endIdx = startIdx + pageSize;
+  const pageTickets = allTickets.slice(startIdx, endIdx);
+  const totalPages = Math.ceil(allTickets.length / pageSize);
+
+  let html = `
+    <div style="margin-bottom: 20px; font-size: 14px; color: #666;">
+      Showing ${startIdx + 1}-${Math.min(endIdx, allTickets.length)} of ${allTickets.length} tickets
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Ticket ID</th>
+          <th>Username</th>
+          <th>Subject</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${pageTickets.map(ticket => `
+          <tr>
+            <td>#${ticket.id}</td>
+            <td>${ticket.username || 'Unknown'}</td>
+            <td>${ticket.subject}</td>
+            <td>
+              <select style="padding: 4px; border-radius: 3px;" onchange="updateTicketStatus(${ticket.id}, this.value)">
+                <option value="open" ${ticket.status === 'open' ? 'selected' : ''}>Open</option>
+                <option value="in_progress" ${ticket.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
+                <option value="resolved" ${ticket.status === 'resolved' ? 'selected' : ''}>Resolved</option>
+                <option value="closed" ${ticket.status === 'closed' ? 'selected' : ''}>Closed</option>
+              </select>
+            </td>
+            <td>${formatDate(ticket.created_at)}</td>
+            <td>
+              <button class="btn" style="font-size: 12px;" onclick="viewTicketDetails(${ticket.id}, '${ticket.subject.replace(/'/g, "\\'")}', '${ticket.message.replace(/'/g, "\\'")}')">View</button>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+      ${page > 1 ? `<button class="btn" onclick="previousTicketPage()">← Previous</button>` : ''}
+      ${page < totalPages ? `<button class="btn btn-primary" onclick="nextTicketPage()">Next →</button>` : ''}
+      <span style="padding: 8px 12px; background: #f0f0f0; border-radius: 3px;">Page ${page}/${totalPages}</span>
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+
+function nextTicketPage() {
+  const { page, pageSize, allTickets } = ticketsPaginationState;
+  const totalPages = Math.ceil(allTickets.length / pageSize);
+  if (page < totalPages) {
+    ticketsPaginationState.page++;
+    displayTicketsPage();
+  }
+}
+
+function previousTicketPage() {
+  if (ticketsPaginationState.page > 1) {
+    ticketsPaginationState.page--;
+    displayTicketsPage();
   }
 }
 
@@ -804,11 +937,30 @@ async function updateTicketStatus(ticketId, newStatus) {
 
 async function loadAdminLogs() {
   try {
-    const logs = await apiCall('/admin/logs', 'GET');
+    const logs = await apiCall('/admin/activity-logs', 'GET');
     const container = document.getElementById('tab-logs');
     if (!container) return;
 
     container.innerHTML = `
+      <div style="margin-bottom: 20px;">
+        <h3 style="color: #003da5; margin-bottom: 10px;">Activity Log Terminal</h3>
+        <div id="admin-terminal" style="background: #1a1a1a; color: #00ff00; font-family: 'Courier New', monospace; font-size: 12px; padding: 15px; border-radius: 3px; height: 400px; overflow-y: auto; border: 2px solid #00ff00;">
+          ${logs.map(log => `
+            <div style="margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+              <span style="color: #888;">[${new Date(log.timestamp).toLocaleTimeString()}]</span>
+              <span style="color: #ffff00;">${log.username || 'system'}@admin:</span>
+              <span style="color: #00ff00;">$ ${log.action}</span>
+              ${log.details ? `<div style="color: #00ff99; margin-left: 20px; font-size: 11px;">${log.details}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+        <div style="margin-top: 10px;">
+          <button class="btn" onclick="clearAdminTerminal()" style="font-size: 12px;">Clear Terminal</button>
+          <button class="btn btn-primary" onclick="refreshAdminLogs()" style="font-size: 12px;">Refresh Logs</button>
+        </div>
+      </div>
+
+      <h3 style="color: #003da5; margin-bottom: 10px; margin-top: 30px;">Detailed Activity Log</h3>
       <table>
         <thead>
           <tr>
@@ -832,6 +984,19 @@ async function loadAdminLogs() {
     `;
   } catch (error) {
     console.error('Failed to load logs:', error);
+    showAlert('Failed to load logs: ' + error.message, 'danger');
+  }
+}
+
+async function refreshAdminLogs() {
+  await loadAdminLogs();
+  showAlert('Activity logs refreshed', 'success');
+}
+
+function clearAdminTerminal() {
+  const terminal = document.getElementById('admin-terminal');
+  if (terminal) {
+    terminal.innerHTML = '<div style="color: #00ff00;">Terminal cleared. Ready for commands.</div>';
   }
 }
 
@@ -927,8 +1092,16 @@ window.navigateTo = navigateTo;
 window.viewUserDetails = viewUserDetails;
 window.toggleUserStatus = toggleUserStatus;
 window.updateTicketStatus = updateTicketStatus;
+window.viewTicketDetails = viewTicketDetails;
+window.nextTicketPage = nextTicketPage;
+window.previousTicketPage = previousTicketPage;
 window.closeModal = closeModal;
 window.openModal = openModal;
+window.toggleServerStatus = toggleServerStatus;
+window.clearLiveLog = clearLiveLog;
+window.refreshAdminOverview = refreshAdminOverview;
+window.clearAdminTerminal = clearAdminTerminal;
+window.refreshAdminLogs = refreshAdminLogs;
 
 // Debug: Log that app.js has loaded
 console.log('✅ app.js loaded successfully! navigateTo available.');
