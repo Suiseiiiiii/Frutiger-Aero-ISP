@@ -7,18 +7,36 @@ const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const helmet = require('helmet');
 const fs = require('fs');
+const https = require('https');
 
 const app = express();
 const PORT = 3000;
 const JWT_SECRET = 'your-secret-key-change-in-production-12345';
 
 // ==================== SECURITY MIDDLEWARE ====================
+
+// Modern HTTPS/TLS configuration with strongest cipher suites
+const httpsOptions = {
+  key: fs.readFileSync(path.join(__dirname, '../certs/key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, '../certs/cert.pem')),
+  // Modern TLS configuration
+  minVersion: 'TLSv1.3',  // Require TLS 1.3 (most modern, strongest)
+  maxVersion: 'TLSv1.3',  // Enforce TLS 1.3
+  ciphers: [
+    'TLS_AES_256_GCM_SHA384',      // AES-256-GCM with SHA384
+    'TLS_CHACHA20_POLY1305_SHA256', // ChaCha20-Poly1305
+    'TLS_AES_128_GCM_SHA256'       // AES-128-GCM with SHA256
+  ].join(':'),
+  honorCipherOrder: true,
+  handshakeTimeout: 10000
+};
+
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],  // Allow inline scripts for onclick handlers
-      scriptSrcAttr: ["'unsafe-inline'"],        // Allow inline event handlers (onclick, etc.)
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrcAttr: ["'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https:"],
       imgSrc: ["'self'", "data:"],
       fontSrc: ["'self'", "https:", "data:"],
@@ -28,14 +46,25 @@ app.use(helmet({
       baseUri: ["'self'"],
       formAction: ["'self'"]
     }
-  }
+  },
+  hsts: {
+    maxAge: 31536000,        // 1 year
+    includeSubDomains: true,
+    preload: true            // HSTS preload list
+  },
+  noSniff: true,             // Prevent MIME type sniffing
+  xssFilter: true,           // XSS protection
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
 }));
+
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: 'https://localhost:3000',
   credentials: true
 }));
 app.use(express.json({ limit: '10kb' }));
 app.use(express.static(path.join(__dirname, '../public')));
+
+// ==================== RATE LIMITING ====================
 
 // Rate limiting - General
 const limiter = rateLimit({
@@ -579,8 +608,14 @@ app.use((err, req, res, next) => {
 
 // ==================== SERVER STARTUP ====================
 
-app.listen(PORT, () => {
-  console.log(`ISP Website server running on http://localhost:${PORT}`);
-  console.log('Admin credentials: username=admin, password=admin123');
-  console.log('Change these in production!');
+https.createServer(httpsOptions, app).listen(PORT, () => {
+  console.log(`\n🔒 ISP Website server running on https://localhost:${PORT}`);
+  console.log(`\n🔐 HTTPS Configuration:`);
+  console.log(`   Protocol: TLS 1.3 (Modern & Secure)`);
+  console.log(`   Cipher Suites: AES-256-GCM, ChaCha20-Poly1305, AES-128-GCM`);
+  console.log(`   Certificate: Self-signed (valid for 365 days)`);
+  console.log(`   Encryption: End-to-end with modern standards`);
+  console.log(`\n⚠️  Admin credentials: username=admin, password=admin123`);
+  console.log(`   Change these in production!\n`);
 });
+

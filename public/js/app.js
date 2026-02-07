@@ -1,6 +1,6 @@
 // ==================== GLOBAL STATE ====================
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://localhost:3000/api';
 let authToken = localStorage.getItem('authToken');
 let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
 let isAdmin = localStorage.getItem('isAdmin') === 'true';

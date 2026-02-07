@@ -5,12 +5,17 @@
  * Tests all functionality including authentication, admin panel, and security features
  */
 
-const http = require('http');
+const https = require('https');
 const assert = require('assert');
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://localhost:3000/api';
 let testsPassed = 0;
 let testsFailed = 0;
+
+// Disable SSL certificate validation for self-signed certificates in testing
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false
+});
 
 function makeRequest(method, path, data = null, token = null) {
   return new Promise((resolve, reject) => {
@@ -22,14 +27,15 @@ function makeRequest(method, path, data = null, token = null) {
       method: method,
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      agent: httpsAgent
     };
 
     if (token) {
       options.headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const req = http.request(options, (res) => {
+    const req = https.request(options, (res) => {
       let responseData = '';
       res.on('data', chunk => responseData += chunk);
       res.on('end', () => {
