@@ -61,6 +61,16 @@ app.use(cors({
   origin: 'https://localhost:3000',
   credentials: true
 }));
+
+// Force HTTPS redirect
+app.use((req, res, next) => {
+  if (req.protocol === 'http') {
+    res.redirect(301, `https://${req.hostname}${req.url}`);
+  } else {
+    next();
+  }
+});
+
 app.use(express.json({ limit: '10kb' }));
 app.use(express.static(path.join(__dirname, '../public')));
 
@@ -608,6 +618,17 @@ app.use((err, req, res, next) => {
 
 // ==================== SERVER STARTUP ====================
 
+// HTTP redirect server (redirects to HTTPS)
+const httpRedirectApp = express();
+httpRedirectApp.use((req, res) => {
+  res.redirect(301, `https://localhost:${PORT}${req.url}`);
+});
+
+httpRedirectApp.listen(8080, () => {
+  console.log(`🔄 HTTP redirect server running on http://localhost:8080`);
+  console.log(`   (all HTTP requests redirect to HTTPS)\n`);
+});
+
 https.createServer(httpsOptions, app).listen(PORT, () => {
   console.log(`\n🔒 ISP Website server running on https://localhost:${PORT}`);
   console.log(`\n🔐 HTTPS Configuration:`);
@@ -618,4 +639,3 @@ https.createServer(httpsOptions, app).listen(PORT, () => {
   console.log(`\n⚠️  Admin credentials: username=admin, password=admin123`);
   console.log(`   Change these in production!\n`);
 });
-
