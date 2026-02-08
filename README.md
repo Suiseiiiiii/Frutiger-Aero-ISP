@@ -1,204 +1,161 @@
-# Premium ISP Website - Complete Documentation
+# Premium ISP Website
 
-A professional, fully-featured ISP website built with HTML, CSS, JavaScript, Node.js, Express, and SQLite. Features Windows Vista/7 Frutiger Aero design, secure authentication, admin panel, and comprehensive rate limiting security measures.
+A professional ISP website with Windows Vista/7 Frutiger Aero design, user authentication, admin panel, and real-time monitoring.
+
+## Quick Start
+
+```bash
+./setup.sh
+npm start
+```
+
+Server runs on `http://localhost:3000`
 
 ## Features
 
-### Frontend
-- **Frutiger Aero Design**: Windows Vista/7-inspired user interface with glass morphism effects
-- **Responsive Layout**: Functions consistently on desktop, tablet, and mobile devices
-- **Multiple Pages**: Home, Login, Signup, Plans, Support, Account, Admin Panel
-- **Real-time Authentication**: JWT-based token system
-- **Interactive Admin Dashboard**: Manage users, view logs, handle support tickets
+- **Design**: Frutiger Aero (Windows Vista/7 style) with glass morphism
+- **Frontend**: Responsive HTML/CSS/JavaScript, multiple pages
+- **Backend**: Express.js + SQLite with REST API
+- **Auth**: JWT tokens, password hashing, rate limiting
+- **Admin Panel**: Manage users, tickets, view logs and uptime
+- **Security**: CORS, Helmet headers, data protection compliance
 
-### Backend
-- **Express.js Server**: RESTful API running on localhost:3000
-- **SQLite Database**: Persistent storage for users, admins, support tickets, and logs
-- **Security Features**:
-  - Password hashing with bcryptjs
-  - Rate limiting on login/signup endpoints
-  - CORS protection
-  - Helmet.js security headers
-  - JWT token authentication
-- **Admin Functionality**:
-  - View all users and account details
-  - Suspend/reactivate user accounts
-  - Manage support tickets
-  - Monitor server uptime
-  - View comprehensive admin activity logs
-  - Track system statistics
+## Setup
 
-### Security and Compliance
-- UK Data Protection Law Compliance
-- Data consent tracking
-- Comprehensive audit logs
-- Rate limiting to prevent brute force attacks
-- Secure password requirements (minimum 8 characters)
-- Token-based authentication with expiration
+### Requirements
+- Node.js v14+
+- npm
+
+### Installation
+```bash
+./setup.sh        # Install dependencies and create db directory
+npm start         # Start server on localhost:3000
+npm test          # Run test suite
+./verify.sh       # Check system and monitor (30 min intervals when server is live)
+```
+
+## Admin Access
+
+**Default credentials:**
+- Username: `admin`
+- Password: `admin123`
+
+Change these in production!
+
+## User Guide
+
+### Regular Users
+1. **Sign Up**: Create account with username, email, password (8+ chars), select plan
+2. **Login**: Use email and password
+3. **Account**: View profile and subscription details
+4. **Support**: Submit and track support tickets
+5. **Plans**: Browse available plans
+
+### Administrators
+1. **Login**: Check "Login as Administrator" on login page
+2. **Dashboard**: View user stats, open tickets, server uptime
+3. **Users**: View all users, suspend/reactivate accounts
+4. **Tickets**: Manage support tickets, change status
+5. **Logs**: Monitor admin activity
+6. **Uptime**: Track server availability
+
+## API Endpoints
+
+```
+Public:
+  GET  /api/health                    Server status
+  GET  /api/plans                     Available plans
+
+Auth:
+  POST /api/auth/signup               Register user
+  POST /api/auth/login                User login
+  POST /api/auth/admin-login          Admin login
+
+User (requires token):
+  GET  /api/user/profile              Get user data
+  PUT  /api/user/profile              Update profile
+
+Support (requires token):
+  POST /api/support/ticket            Create ticket
+  GET  /api/support/tickets           Get user tickets
+
+Admin (requires admin token):
+  GET  /api/admin/users               All users
+  GET  /api/admin/user/:id            User details
+  POST /api/admin/user/:id/suspend    Suspend user
+  POST /api/admin/user/:id/reactivate Reactivate user
+  GET  /api/admin/support-tickets     All tickets
+  PUT  /api/admin/support-ticket/:id  Update ticket
+  GET  /api/admin/logs                Admin logs
+  GET  /api/admin/uptime              Server uptime
+  GET  /api/admin/statistics          System stats
+```
+
+## Security
+
+- **Password**: Minimum 8 characters, bcrypt hashing
+- **Tokens**: JWT with expiration (7 days user, 1 day admin)
+- **Rate Limiting**: 
+  - General: 100 requests/15 min per IP
+  - Login: 5 failed attempts/15 min per IP
+  - Signup: 50 signups/hour per IP
+- **Headers**: Helmet.js security headers
+- **CORS**: Restricted to localhost
+- **Compliance**: UK Data Protection Law, consent tracking
 
 ## Project Structure
 
 ```
-websit/
-├── package.json                 # Node.js dependencies
-├── public/
-│   ├── index.html              # Main HTML file (all pages)
-│   ├── css/
-│   │   └── style.css           # Frutiger Aero styling
-│   └── js/
-│       └── app.js              # Frontend JavaScript logic
 ├── backend/
-│   ├── server.js               # Express server and API endpoints
-│   ├── test.js                 # Comprehensive test suite
-│   ├── db/
-│   │   └── isp.db              # SQLite database (auto-created)
-│   └── logs/
-│       └── admin_logs.json     # Admin activity logs
-└── README.md                   # This file
+│   ├── server.js          Express server, API routes
+│   ├── test.js            Test suite
+│   └── db/                Database directory
+├── public/
+│   ├── index.html         Main page
+│   ├── css/style.css      Styling
+│   └── js/app.js          Frontend logic
+├── package.json           Dependencies
+└── README.md              This file
 ```
 
-## Quick Start Guide
+## Database
 
-### Prerequisites
-- Node.js (v14 or higher)
-- npm (comes with Node.js)
-- A modern web browser
+Auto-created SQLite database with tables for:
+- **users**: User accounts
+- **admins**: Admin accounts
+- **support_tickets**: Support tickets
+- **admin_logs**: Admin activity logs
 
-### Installation and Running
+## Troubleshooting
 
-1. **Navigate to project directory**:
-   ```bash
-   cd /home/username/Desktop/websit
-   ```
+**Port 3000 in use:**
+```bash
+lsof -ti:3000 | xargs kill -9
+npm start
+```
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+**Database issues:**
+```bash
+rm backend/db/isp.db
+npm start
+```
 
-3. **Start the server**:
-   ```bash
-   npm start
-   ```
-   
-   The server will start on `http://localhost:3000`
-
-4. **Open in browser**:
-   - Navigate to `http://localhost:3000` in your web browser
-   - You should see the Premium ISP homepage
+**Dependencies:**
+```bash
+npm ci --silent
+```
 
 ## Testing
-
-Run the comprehensive test suite to verify all functionality:
 
 ```bash
 npm test
 ```
 
-The test suite will validate:
-- Public API endpoints
-- User authentication (signup/login)
-- User profile management
-- Support ticket creation and retrieval
-- Admin authentication
-- Admin endpoints (users, tickets, logs, uptime)
-- User suspension/reactivation
-- Security measures and permissions
-- Input validation
+Validates all endpoints, auth, security, and functionality.
 
-## Default Admin Credentials
+## License
 
-**Username**: `admin`
-**Password**: `admin123`
-
-**WARNING**: Change these credentials in production!
-
-## User Guide
-
-### For Regular Users
-
-1. **Create Account**:
-   - Click "Sign Up" button
-   - Enter username, email, password (minimum 8 characters)
-   - Select a plan (Basic, Professional, or Enterprise)
-   - Agree to data processing terms
-   - Click "Create Account"
-
-2. **Login**:
-   - Click "Login" button
-   - Enter email and password
-   - Click "Login"
-
-3. **View Account**:
-   - Click "Account" in navigation (only when logged in)
-   - View your account details, plan, and member since date
-
-4. **Create Support Ticket**:
-   - Navigate to "Support" page
-   - Fill in subject and message
-   - Click "Submit Ticket"
-   - View status of all your tickets
-
-5. **View Plans**:
-   - Click "Plans" to see available plans
-   - Choose a plan to select (if logged in)
-
-### For Administrators
-
-1. **Admin Login**:
-   - Go to Login page
-   - Check "Login as Administrator"
-   - Enter admin username and password
-   - Click "Login"
-
-2. **Dashboard Overview**:
-   - See total users, active users
-   - Monitor open support tickets
-   - View server uptime
-
-3. **User Accounts Management**:
-   - View all registered users
-   - Click "View" to see user details
-   - Suspend/Reactivate user accounts
-
-4. **Support Ticket Management**:
-   - View all support tickets
-   - Update ticket status (Open, In Progress, Resolved, Closed)
-   - View ticket details and user messages
-
-5. **Activity Logs**:
-   - Monitor all admin actions
-   - Track who did what and when
-   - Comprehensive audit trail
-
-6. **Server Uptime**:
-   - Monitor server uptime in real-time
-   - View server time and status
-   - Track system availability
-
-## API Endpoints
-
-### Public Endpoints
-
-```
-GET  /api/health           - Server health check
-GET  /api/plans            - Get available plans
-```
-
-### Authentication Endpoints
-
-```
-POST /api/auth/signup       - User registration
-POST /api/auth/login        - User login
-POST /api/auth/admin-login  - Admin login
-```
-
-### User Endpoints (requires token)
-
-```
-GET  /api/user/profile     - Get user profile
-PUT  /api/user/profile     - Update user profile
-```
+ISP website for demonstration purposes.
 
 ### Support Endpoints (requires token)
 
