@@ -573,6 +573,7 @@ function initAdminPanel() {
 
   console.log('Loading initial admin overview...');
   loadAdminOverview();
+  initAdminTerminal();
 }
 
 async function loadAdminOverview() {
@@ -1079,6 +1080,77 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+// ==================== ADMIN TERMINAL ====================
+
+function initAdminTerminal() {
+  const terminalContainer = document.getElementById('admin-terminal-container');
+  if (!terminalContainer) return;
+
+  terminalContainer.innerHTML = `
+    <div class="terminal-header">
+      <h3 style="margin: 0; color: #00ff00; font-family: 'Courier New';">System Terminal</h3>
+      <button class="btn" style="padding: 5px 10px; font-size: 12px;" onclick="clearAdminTerminal()">Clear</button>
+    </div>
+    <div id="terminal-output" class="terminal-output"></div>
+    <div class="terminal-input-container">
+      <span style="color: #00ff00; font-family: 'Courier New';">admin@isp:~$ </span>
+      <input type="text" id="terminal-input" class="terminal-input" placeholder="Type 'help' for commands" autocomplete="off">
+    </div>
+  `;
+
+  const input = document.getElementById('terminal-input');
+  const output = document.getElementById('terminal-output');
+
+  input.addEventListener('keypress', async (e) => {
+    if (e.key === 'Enter') {
+      const command = input.value.trim();
+      input.value = '';
+
+      if (!command) return;
+
+      // Display command
+      output.innerHTML += `<div style="color: #00ff00; font-family: 'Courier New'; margin: 5px 0;">admin@isp:~$ ${command}</div>`;
+
+      try {
+        const response = await apiCall('/admin/terminal/execute', 'POST', { command });
+        
+        if (response.success) {
+          const lines = response.output.split('\n');
+          lines.forEach(line => {
+            output.innerHTML += `<div style="color: #0f0; font-family: 'Courier New'; margin: 2px 0; white-space: pre-wrap;">${escapeHtml(line)}</div>`;
+          });
+        } else {
+          output.innerHTML += `<div style="color: #ff4444; font-family: 'Courier New'; margin: 5px 0;">Error: ${response.error}</div>`;
+        }
+      } catch(error) {
+        output.innerHTML += `<div style="color: #ff4444; font-family: 'Courier New'; margin: 5px 0;">Error: ${error.message}</div>`;
+      }
+
+      output.scrollTop = output.scrollHeight;
+    }
+  });
+
+  input.focus();
+}
+
+function clearAdminTerminal() {
+  const output = document.getElementById('terminal-output');
+  if (output) output.innerHTML = '';
+  const input = document.getElementById('terminal-input');
+  if (input) input.focus();
+}
+
+function escapeHtml(text) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, m => map[m]);
+}
+
 function showDebugButtonIfAdmin() {
   const debugButton = document.getElementById('debug-button');
   if (debugButton) {
@@ -1093,6 +1165,8 @@ window.navigateTo = navigateTo;
 window.viewUserDetails = viewUserDetails;
 window.toggleUserStatus = toggleUserStatus;
 window.updateTicketStatus = updateTicketStatus;
+window.initAdminTerminal = initAdminTerminal;
+window.clearAdminTerminal = clearAdminTerminal;
 window.viewTicketDetails = viewTicketDetails;
 window.nextTicketPage = nextTicketPage;
 window.previousTicketPage = previousTicketPage;

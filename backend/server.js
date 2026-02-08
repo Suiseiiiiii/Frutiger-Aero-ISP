@@ -566,6 +566,123 @@ app.get('/api/admin/uptime-history', verifyAdmin, (req, res) => {
   res.json(history);
 });
 
+// ==================== ADMIN TERMINAL COMMANDS ====================
+
+app.post('/api/admin/terminal/execute', verifyAdmin, (req, res) => {
+  const { command } = req.body;
+  const adminId = req.user.id;
+  
+  if (!command) {
+    return res.status(400).json({ error: 'Command required' });
+  }
+
+  const { execSync } = require('child_process');
+  const path = require('path');
+  const projectRoot = path.join(__dirname, '..');
+  
+  try {
+    let output = '';
+    
+    // Whitelist of safe commands
+    switch(command.trim()) {
+      case 'restart':
+        logAdminAction(adminId, 'SERVER_RESTART', 'Server restart initiated');
+        output = 'Server restart initiated. Please refresh page in 3 seconds.';
+        setTimeout(() => process.exit(0), 1000);
+        break;
+        
+      case 'verify':
+        try {
+          output = execSync(`cd ${projectRoot} && bash verify.sh`, { 
+            encoding: 'utf8',
+            timeout: 30000 
+          }).trim();
+        } catch(e) {
+          output = e.stdout || e.message;
+        }
+        logAdminAction(adminId, 'VERIFY_RUN', 'Verify script executed');
+        break;
+        
+      case 'logs show':
+        try {
+          output = execSync(`cd ${projectRoot} && bash log.sh show`, { 
+            encoding: 'utf8',
+            timeout: 10000 
+          }).trim();
+        } catch(e) {
+          output = e.stdout || e.message;
+        }
+        logAdminAction(adminId, 'LOGS_VIEWED', 'Admin viewed system logs');
+        break;
+        
+      case 'db stats':
+        try {
+          const dbSize = execSync(`ls -lh ${projectRoot}/backend/db/isp.db 2>/dev/null | awk '{print $5}'`, {
+            encoding: 'utf8',
+            timeout: 5000
+          }).trim();
+          const userCount = db.get('SELECT COUNT(*) as count FROM users').count;
+          const ticketCount = db.get('SELECT COUNT(*) as count FROM support_tickets').count;
+          
+          output = `Database Statistics:\n`;
+          output += `  File Size: ${dbSize || 'N/A'}\n`;
+          output += `  Total Users: ${userCount}\n`;
+          output += `  Support Tickets: ${ticketCount}`;
+          
+          logAdminAction(adminId, 'DB_STATS', `User: ${userCount}, Tickets: ${ticketCount}`);
+        } catch(e) {
+          output = `Error: ${e.message}`;
+        }
+        break;
+        
+      case 'server status':
+        output = `Server Status:\n`;
+        output += `  Status: ONLINE\n`;
+        output += `  Port: ${PORT}\n`;
+        output += `  Uptime: ${Math.round(process.uptime() / 60)} minutes\n`;
+        output += `  Memory: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)} MB`;
+        logAdminAction(adminId, 'SERVER_STATUS_CHECK', 'Status checked');
+        break;
+        
+      case 'help':
+        output = `Available Commands:\n`;
+        output += `  restart           - Restart the server\n`;
+        output += `  verify            - Run verification script\n`;
+        output += `  logs show         - Display system logs\n`;
+        output += `  db stats          - Show database statistics\n`;
+        output += `  server status     - Show server status\n`;
+        output += `  help              - Show this help message`;
+        break;
+        
+      default:
+        return res.status(400).json({ error: 'Unknown command. Type "help" for available commands.' });
+    }
+    
+    res.json({ output, success: true });
+  } catch(error) {
+    logAdminAction(adminId, 'COMMAND_ERROR', `Error: ${error.message}`);
+    res.status(500).json({ error: error.message, success: false });
+  }
+});
+
+app.get('/api/admin/logs', verifyAdmin, (req, res) => {
+  try {
+    const fs = require('fs');
+    const logsPath = path.join(__dirname, 'logs/system.log');
+    
+    if (!fs.existsSync(logsPath)) {
+      return res.json({ logs: [], total: 0 });
+    }
+    
+    const content = fs.readFileSync(logsPath, 'utf8');
+    const logs = content.split('\n').filter(line => line.trim()).reverse();
+    
+    res.json({ logs: logs.slice(0, 100), total: logs.length });
+  } catch(error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ==================== ERROR HANDLER ====================
 
 app.use((req, res) => {
