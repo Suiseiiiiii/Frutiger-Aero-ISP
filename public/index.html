@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium ISP - High Speed Internet Services</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script>
+        // Early placeholder to prevent "navigateTo is not defined" errors
+        window.navigateTo = function(page) {
+            console.warn('navigateTo called before app.js loaded! Page:', page);
+        };
+        // Debug test
+        console.log('🔵 HTML head loaded');
+    </script>
+</head>
+<body>
+    <div id="debug-button" style="position: fixed; top: 10px; right: 10px; background: red; color: white; padding: 10px; z-index: 9999; border-radius: 5px; display: none;">
+        DEBUG: Click to test → <button onclick="console.log('TEST BUTTON CLICKED'); alert('Button works!');" style="background: white; color: red; border: 1px solid red; padding: 5px; cursor: pointer; border-radius: 3px;">TEST</button>
+    </div>
+    <!-- ==================== HEADER & NAVIGATION ==================== -->
+    <header>
+        <div class="header-container">
+            <a href="#" onclick="navigateTo('home'); return false;" class="logo">
+                <div class="logo-icon">ISP</div>
+                Premium ISP
+            </a>
+            <nav>
+                <ul>
+                    <!-- Populated by JavaScript -->
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ==================== ALERT CONTAINER ==================== -->
+    <div id="alert-container" style="max-width: 1200px; margin: 20px auto;"></div>
+
+    <!-- ==================== MODAL ==================== -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Details</span>
+                <button class="close-modal" onclick="closeModal('modal')">&times;</button>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal('modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <!-- ==================== HOME PAGE ==================== -->
+        <div id="page-home" class="page">
+            <div class="hero">
+                <h1>Ultra-Fast Internet Service Provider</h1>
+                <p>Experience blazing-fast speeds with our premium internet service</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="navigateTo('plans'); return false;">View Plans</button>
+                    <button class="btn btn-primary" onclick="navigateTo('signup'); return false;">Get Started Now</button>
+                    <button class="btn" onclick="navigateTo('support'); return false;">24/7 Support</button>
+                </div>
+            </div>
+
+            <div class="container mt-30">
+                <h2 style="text-align: center; color: #003da5; margin-bottom: 30px;">Why Choose Us?</h2>
+                <div class="grid grid-3">
+                    <div class="card">
+                        <div class="card-header">Lightning Fast</div>
+                        <p>Experience speeds up to 300 Mbps with our enterprise fiber network. Stream, download, and upload at incredible speeds.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">Secure and Reliable</div>
+                        <p>Industry-leading security with 99.9% uptime guarantee. Your data is protected with enterprise-grade encryption.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">Exceptional Support</div>
+                        <p>24/7 customer support team ready to help. Get technical assistance whenever you need it.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">Unlimited Data</div>
+                        <p>No data caps on any of our plans. Stream, game, and work without worrying about limits.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">Wide Coverage</div>
+                        <p>Serving customers across the UK. Our network continues to expand to reach more homes.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">Best Value</div>
+                        <p>Competitive pricing with no hidden fees. Choose the plan that fits your budget and needs.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container mt-30" style="text-align: center;">
+                <h2 style="color: #003da5; margin-bottom: 20px;">Ready to Switch to Premium ISP?</h2>
+                <p style="margin-bottom: 20px; font-size: 18px;">Join thousands of satisfied customers enjoying fast, reliable internet.</p>
+                <button class="btn btn-primary" style="font-size: 16px; padding: 12px 30px;" onclick="navigateTo('signup'); return false;">Sign Up Today</button>
+            </div>
+        </div>
+
+        <!-- ==================== LOGIN PAGE ==================== -->
+        <div id="page-login" class="page" style="display: none;">
+            <div class="container">
+                <div style="max-width: 500px; margin: 40px auto;">
+                    <div class="panel">
+                        <div class="panel-title">User Login</div>
+                        
+                        <form id="login-form">
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="login-as-admin"> Login as Administrator
+                                </label>
+                            </div>
+
+                            <div class="form-group" id="login-email-field">
+                                <label for="login-email">Email Address</label>
+                                <input type="email" id="login-email" required>
+                            </div>
+
+                            <div class="form-group" id="login-username-field" style="display: none;">
+                                <label for="login-username">Admin Username</label>
+                                <input type="text" id="login-username">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="login-password">Password</label>
+                                <input type="password" id="login-password" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 15px;">Login</button>
+                        </form>
+
+                        <p style="text-align: center; margin-top: 20px;">
+                            Don't have an account? <a href="#" onclick="navigateTo('signup'); return false;" style="color: #0078d7; text-decoration: none;">Sign up here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SIGNUP PAGE ==================== -->
+        <div id="page-signup" class="page" style="display: none;">
+            <div class="container">
+                <div style="max-width: 500px; margin: 40px auto;">
+                    <div class="panel">
+                        <div class="panel-title">Create Your Account</div>
+
+                        <form id="signup-form">
+                            <div class="form-group">
+                                <label for="signup-username">Username</label>
+                                <input type="text" id="signup-username" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="signup-email">Email Address</label>
+                                <input type="email" id="signup-email" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="signup-password">Password (min 8 characters)</label>
+                                <input type="password" id="signup-password" required minlength="8">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="signup-plan">Select Plan</label>
+                                <select id="signup-plan" required>
+                                    <option value="basic">Basic - £19.99/month</option>
+                                    <option value="professional">Professional - £39.99/month</option>
+                                    <option value="enterprise">Enterprise - £79.99/month</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="signup-consent" required>
+                                    I agree to the Terms of Service and understand that my data will be processed in accordance with UK data protection laws
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 15px;">Create Account</button>
+                        </form>
+
+                        <p style="text-align: center; margin-top: 20px;">
+                            Already have an account? <a href="#" onclick="navigateTo('login'); return false;" style="color: #0078d7; text-decoration: none;">Login here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== PLANS PAGE ==================== -->
+        <div id="page-plans" class="page" style="display: none;">
+            <div class="container">
+                <h1 style="text-align: center; color: #003da5; margin-bottom: 40px;">Our Internet Plans</h1>
+                
+                <div id="plans-grid" class="grid grid-3">
+                    <!-- Loaded by JavaScript -->
+                </div>
+
+                <div class="panel mt-30">
+                    <div class="panel-title">Frequently Asked Questions</div>
+                    <div style="line-height: 1.8;">
+                        <p><strong>Q: Can I upgrade my plan later?</strong></p>
+                        <p>A: Yes, you can upgrade or downgrade your plan anytime from your account settings.</p>
+                        
+                        <p style="margin-top: 15px;"><strong>Q: Are there any setup fees?</strong></p>
+                        <p>A: No, we don't charge any setup fees or hidden charges. Just pay your monthly subscription.</p>
+                        
+                        <p style="margin-top: 15px;"><strong>Q: What if I'm not satisfied?</strong></p>
+                        <p>A: We offer a 30-day money-back guarantee if you're not completely satisfied.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SUPPORT PAGE ==================== -->
+        <div id="page-support" class="page" style="display: none;">
+            <div class="container">
+                <h1 style="text-align: center; color: #003da5; margin-bottom: 40px;">Support & Help</h1>
+
+                <div class="grid grid-2">
+                    <div class="panel">
+                        <div class="panel-title">Create Support Ticket</div>
+                        
+                        <form id="support-form">
+                            <div class="form-group">
+                                <label for="support-subject">Subject</label>
+                                <input type="text" id="support-subject" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="support-message">Message</label>
+                                <textarea id="support-message" required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Ticket</button>
+                        </form>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-title">Contact Information</div>
+                        <p><strong>Email:</strong> support@premierisp.com</p>
+                        <p><strong>Phone:</strong> 0800-XXX-XXXX</p>
+                        <p><strong>Hours:</strong> 24/7 Support Available</p>
+                        <p style="margin-top: 20px; color: #666;">We're committed to resolving your issues quickly and efficiently. Our support team is available around the clock.</p>
+                    </div>
+                </div>
+
+                <div class="panel mt-20">
+                    <div class="panel-title">Your Support Tickets</div>
+                    <div id="user-tickets" style="text-align: center; color: #666; padding: 20px;">
+                        <p>Login to view your support tickets</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== ACCOUNT PAGE ==================== -->
+        <div id="page-account" class="page" style="display: none;">
+            <div class="container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h1 style="color: #003da5; margin: 0;">My Account</h1>
+                    <button class="btn btn-primary" onclick="toggleDarkMode()" style="margin: 0;">Dark Mode</button>
+                </div>
+                <div id="account-content">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== ADMIN PANEL ==================== -->
+        <div id="page-admin" class="page" style="display: none;">
+            <div class="container">
+                <h1 style="color: #003da5; margin-bottom: 20px;">Administrator Panel</h1>
+
+                <div class="panel">
+                    <div class="tabs">
+                        <button class="tab-button active" data-tab="overview">Dashboard Overview</button>
+                        <button class="tab-button" data-tab="users">User Accounts</button>
+                        <button class="tab-button" data-tab="tickets">Support Tickets</button>
+                        <button class="tab-button" data-tab="logs">Activity Logs</button>
+                        <button class="tab-button" data-tab="uptime">Server Uptime</button>
+                    </div>
+
+                    <div id="tab-overview" class="tab-content active">
+                        <div class="loading-spinner"></div>
+                    </div>
+
+                    <div id="tab-users" class="tab-content">
+                        <div class="loading-spinner"></div>
+                    </div>
+
+                    <div id="tab-tickets" class="tab-content">
+                        <div class="loading-spinner"></div>
+                    </div>
+
+                    <div id="tab-logs" class="tab-content">
+                        <div class="loading-spinner"></div>
+                    </div>
+
+                    <div id="tab-uptime" class="tab-content">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== PAGE GROUPS (HIDDEN) ==================== -->
+        <div id="page-admin-users" class="page" style="display: none;"></div>
+        <div id="page-admin-tickets" class="page" style="display: none;"></div>
+        <div id="page-admin-logs" class="page" style="display: none;"></div>
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Premium ISP</h3>
+                <p>Delivering fast, reliable internet service across the UK since 2020.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#" onclick="navigateTo('home'); return false;">Home</a></li>
+                    <li><a href="#" onclick="navigateTo('plans'); return false;">Plans</a></li>
+                    <li><a href="#" onclick="navigateTo('support'); return false;">Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <ul>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Data Protection</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <ul>
+                    <li>Email: support@premierisp.com</li>
+                    <li>Phone: 0800-XXX-XXXX</li>
+                    <li>Hours: 24/7 Support</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Premium ISP. All rights reserved. | Professional Implementation | UK Data Protection Compliant</p>
+        </div>
+    </footer>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
