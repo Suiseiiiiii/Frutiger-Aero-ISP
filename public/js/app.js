@@ -108,6 +108,7 @@ function navigateTo(page) {
     if (page === 'account' && currentUser) initAccountPage();
     if (page === 'plans') loadPlans();
     if (page === 'support') initSupportPage();
+    if (page === 'admin') initAdminPanel();
     if (page === 'admin-users') loadAdminUsers();
     if (page === 'admin-tickets') loadAdminTickets();
     if (page === 'admin-logs') loadAdminLogs();
