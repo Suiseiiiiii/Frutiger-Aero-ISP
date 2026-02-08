@@ -7,10 +7,21 @@ const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const helmet = require('helmet');
 const fs = require('fs');
+const memoryManager = require('./memory-manager');
 
 const app = express();
 const PORT = 3000;
 const JWT_SECRET = 'your-secret-key-change-in-production-12345';
+
+// ==================== MEMORY MANAGEMENT ====================
+const monitor = new memoryManager.Monitor({
+  checkInterval: 60000, // Check every 1 minute
+  threshold: 256 * 1024 * 1024, // Trigger GC at 256MB
+  maxHeapUsage: 1024 * 1024 * 1024 // 1GB max
+});
+
+monitor.start();
+console.log('Memory manager started - monitoring heap usage');
 
 // ==================== SECURITY MIDDLEWARE ====================
 app.use(helmet({
@@ -577,7 +588,6 @@ app.post('/api/admin/terminal/execute', verifyAdmin, (req, res) => {
   }
 
   const { execSync } = require('child_process');
-  const path = require('path');
   const projectRoot = path.join(__dirname, '..');
   
   try {
@@ -586,7 +596,7 @@ app.post('/api/admin/terminal/execute', verifyAdmin, (req, res) => {
     // Whitelist of safe commands
     switch(command.trim()) {
       case 'restart':
-        logAdminAction(adminId, 'SERVER_RESTART', 'Server restart initiated');
+        db.run('INSERT INTO admin_logs (admin_id, action, details) VALUES (?, ?, ?)', [adminId, 'SERVER_RESTART', 'Server restart initiated']);
         output = 'Server restart initiated. Please refresh page in 3 seconds.';
         setTimeout(() => process.exit(0), 1000);
         break;
@@ -595,53 +605,96 @@ app.post('/api/admin/terminal/execute', verifyAdmin, (req, res) => {
         try {
           output = execSync(`cd ${projectRoot} && bash verify.sh`, { 
             encoding: 'utf8',
-            timeout: 30000 
+            timeout: 30000,
+            stdio: ['pipe', 'pipe', 'pipe']
           }).trim();
         } catch(e) {
-          output = e.stdout || e.message;
+          output = e.stdout ? e.stdout.toString() : e.message;
         }
-        logAdminAction(adminId, 'VERIFY_RUN', 'Verify script executed');
+        db.run('INSERT INTO admin_logs (admin_id, action, details) VALUES (?, ?, ?)', [adminId, 'VERIFY_RUN', 'Verify script executed']);
         break;
         
       case 'logs show':
         try {
           output = execSync(`cd ${projectRoot} && bash log.sh show`, { 
             encoding: 'utf8',
-            timeout: 10000 
+            timeout: 10000,
+            stdio: ['pipe', 'pipe', 'pipe']
           }).trim();
         } catch(e) {
-          output = e.stdout || e.message;
+          output = e.stdout ? e.stdout.toString() : e.message;
         }
-        logAdminAction(adminId, 'LOGS_VIEWED', 'Admin viewed system logs');
+        db.run('INSERT INTO admin_logs (admin_id, action, details) VALUES (?, ?, ?)', [adminId, 'LOGS_VIEWED', 'Admin viewed system logs']);
         break;
         
       case 'db stats':
         try {
-          const dbSize = execSync(`ls -lh ${projectRoot}/backend/db/isp.db 2>/dev/null | awk '{print $5}'`, {
+          const dbFile = path.join(projectRoot, 'backend/db/isp.db');
+          const dbSize = execSync(`ls -lh ${dbFile} 2>/dev/null | awk '{print $5}'`, {
             encoding: 'utf8',
-            timeout: 5000
+            timeout: 5000,
+            stdio: ['pipe', 'pipe', 'pipe']
           }).trim();
-          const userCount = db.get('SELECT COUNT(*) as count FROM users').count;
-          const ticketCount = db.get('SELECT COUNT(*) as count FROM support_tickets').count;
           
-          output = `Database Statistics:\n`;
-          output += `  File Size: ${dbSize || 'N/A'}\n`;
-          output += `  Total Users: ${userCount}\n`;
-          output += `  Support Tickets: ${ticketCount}`;
-          
-          logAdminAction(adminId, 'DB_STATS', `User: ${userCount}, Tickets: ${ticketCount}`);
+          db.get('SELECT COUNT(*) as count FROM users', (err, row) => {
+            const userCount = err ? 'N/A' : (row ? row.count : 0);
+            db.get('SELECT COUNT(*) as count FROM support_tickets', (err, row2) => {
+              const ticketCount = err ? 'N/A' : (row2 ? row2.count : 0);
+              
+              let stats = `Database Statistics:\n`;
+              stats += `  File Size: ${dbSize || 'N/A'}\n`;
+              stats += `  Total Users: ${userCount}\n`;
+              stats += `  Support Tickets: ${ticketCount}`;
+              
+              db.run('INSERT INTO admin_logs (admin_id, action, details) VALUES (?, ?, ?)', [adminId, 'DB_STATS', `Users: ${userCount}, Tickets: ${ticketCount}`]);
+              
+              res.json({ output: stats, success: true });
+            });
+          });
+          return;
         } catch(e) {
           output = `Error: ${e.message}`;
         }
         break;
         
       case 'server status':
+        const uptime = Math.round(process.uptime() / 60);
+        const memory = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
         output = `Server Status:\n`;
         output += `  Status: ONLINE\n`;
         output += `  Port: ${PORT}\n`;
-        output += `  Uptime: ${Math.round(process.uptime() / 60)} minutes\n`;
-        output += `  Memory: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)} MB`;
-        logAdminAction(adminId, 'SERVER_STATUS_CHECK', 'Status checked');
+        output += `  Uptime: ${uptime} minutes\n`;
+        output += `  Memory: ${memory} MB`;
+        db.run('INSERT INTO admin_logs (admin_id, action, details) VALUES (?, ?, ?)', [adminId, 'SERVER_STATUS_CHECK', `Uptime: ${uptime}min, Memory: ${memory}MB`]);
+        break;
+        
+      case 'memory stats':
+        try {
+          const memStats = memoryManager.stats();
+          const nodeMemory = process.memoryUsage();
+          
+          output = `Memory Statistics:\n`;
+          output += `\nNode.js Memory:\n`;
+          output += `  Heap Used: ${Math.round(nodeMemory.heapUsed / 1024 / 1024)} MB\n`;
+          output += `  Heap Total: ${Math.round(nodeMemory.heapTotal / 1024 / 1024)} MB\n`;
+          output += `  External: ${Math.round(nodeMemory.external / 1024 / 1024)} MB\n`;
+          output += `  RSS: ${Math.round(nodeMemory.rss / 1024 / 1024)} MB\n`;
+          output += `\nManager Memory:\n`;
+          output += `  Total Allocated: ${Math.round(memStats.totalAllocated / 1024 / 1024)} MB\n`;
+          output += `  Total Freed: ${Math.round(memStats.totalFreed / 1024 / 1024)} MB\n`;
+          output += `  Active Blocks: ${memStats.activeBlocks}\n`;
+          output += `  Current Usage: ${Math.round(memStats.currentUsage / 1024 / 1024)} MB`;
+          
+          db.run('INSERT INTO admin_logs (admin_id, action, details) VALUES (?, ?, ?)', [adminId, 'MEMORY_STATS', `Heap: ${Math.round(nodeMemory.heapUsed / 1024 / 1024)}MB`]);
+        } catch(e) {
+          output = `Error: ${e.message}`;
+        }
+        break;
+        
+      case 'gc':
+        memoryManager.collect();
+        output = 'Garbage collection triggered';
+        db.run('INSERT INTO admin_logs (admin_id, action, details) VALUES (?, ?, ?)', [adminId, 'GARBAGE_COLLECTION', 'Manual GC triggered']);
         break;
         
       case 'help':
@@ -651,6 +704,8 @@ app.post('/api/admin/terminal/execute', verifyAdmin, (req, res) => {
         output += `  logs show         - Display system logs\n`;
         output += `  db stats          - Show database statistics\n`;
         output += `  server status     - Show server status\n`;
+        output += `  memory stats      - Show memory usage\n`;
+        output += `  gc                - Trigger garbage collection\n`;
         output += `  help              - Show this help message`;
         break;
         
@@ -660,7 +715,8 @@ app.post('/api/admin/terminal/execute', verifyAdmin, (req, res) => {
     
     res.json({ output, success: true });
   } catch(error) {
-    logAdminAction(adminId, 'COMMAND_ERROR', `Error: ${error.message}`);
+    console.error('Terminal command error:', error);
+    db.run('INSERT INTO admin_logs (admin_id, action, details) VALUES (?, ?, ?)', [adminId, 'COMMAND_ERROR', error.message]);
     res.status(500).json({ error: error.message, success: false });
   }
 });
@@ -678,6 +734,33 @@ app.get('/api/admin/logs', verifyAdmin, (req, res) => {
     const logs = content.split('\n').filter(line => line.trim()).reverse();
     
     res.json({ logs: logs.slice(0, 100), total: logs.length });
+  } catch(error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== MEMORY STATISTICS ====================
+
+app.get('/api/admin/memory-stats', verifyAdmin, (req, res) => {
+  try {
+    const stats = memoryManager.stats();
+    const nodeMemory = process.memoryUsage();
+    
+    res.json({
+      nodejs: {
+        heapUsed: Math.round(nodeMemory.heapUsed / 1024 / 1024),
+        heapTotal: Math.round(nodeMemory.heapTotal / 1024 / 1024),
+        external: Math.round(nodeMemory.external / 1024 / 1024),
+        rss: Math.round(nodeMemory.rss / 1024 / 1024)
+      },
+      manager: {
+        totalAllocated: Math.round(stats.totalAllocated / 1024 / 1024),
+        totalFreed: Math.round(stats.totalFreed / 1024 / 1024),
+        activeBlocks: stats.activeBlocks,
+        currentUsage: Math.round(stats.currentUsage / 1024 / 1024)
+      },
+      uptime: Math.round(process.uptime() / 60)
+    });
   } catch(error) {
     res.status(500).json({ error: error.message });
   }
